@@ -21,11 +21,16 @@ public:
 	}
 
 	/* Vectors */
-	std::vector<std::string> vecMessages;
-	/* END Vectors*/
+	std::vector<std::string> vecMessages;	// Hold messages to be displayed
+	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes; // Holds the C64 colour code by key, value
+	
+
+	/* Sprites */
+	olc::Sprite* sprBalloon;
+	olc::Decal* decBalloon;
+
 
 	/* C64 Colour Code Pixels */
-	
 	// Thank you too: https://lospec.com/palette-list/commodore64 
 
 	// Holds the correct RGB Colours codes for C64
@@ -54,12 +59,11 @@ public:
 		
 	};
 
-	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes;
+	
 
 	// C64 colour palette
 	C64Color C64Color;
 	
-	/* END C64 Colour Code Pixels */
 
 	/* C64 Base Screen text */
 
@@ -71,7 +75,7 @@ public:
 	std::string strLoading = "LOADING...";
 	std::string strRun = "RUN...";
 
-	/* END C64 Base Screen text */
+
 
 
 
@@ -81,18 +85,27 @@ public:
 		// Lets build up our colour code (will make life easier later
 		C64LoadColourCodes();
 
+		C64CreateBalloonSprite();
+
 		return true;
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		// Called once per frame, draws random coloured pixels
+		SetDrawTarget(nullptr);
+		Clear(olc::BLANK);
 		FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
 		if (GetKey(olc::Key::LEFT).bHeld) C64LoadingScreen();
 		C64DisplayScreen();
 		C64DisplayHeader();
 		
-
+		if (GetMouse(0).bHeld)
+		{
+			DrawDecal(GetMousePos(), decBalloon);
+		}
+		
+		//DrawSprite(GetMousePos(), sprBalloon);
 
 		return true;
 	}
@@ -128,7 +141,6 @@ private:
 	void C64DisplayScreen()
 	{
 		
-
 		FillRectDecal({ 20,20 }, { 280, 160 }, C64Color.Blue);
 
 	}
@@ -157,6 +169,62 @@ private:
 			}
 			FillRectDecal({ 0.0f, (float)y }, { (float)ScreenWidth(), 10.0f }, p);
 		}
+	}
+
+	void C64CreateBalloonSprite()
+	{
+		// Right we have a sprite of size 24 X 20
+		
+		sprBalloon = new olc::Sprite(24, 20);
+
+
+		std::string sBalloonMap =
+			".........#######........"
+			".......###########......"
+			"......#############....."
+			"......#####..######....."
+			".....#####.##..#####...."
+			".....#####.#########...."
+			".....#####.##..#####...."
+			"......#####..######....."
+			"......#############....."
+			"......#.#########.#....."
+			".......#.#######.#......"
+			".......#..#####..#......"
+			"........#..###..#......."
+			"........#..###..#......."
+			".........#..#..#........"
+			".........#..#..#........"
+			"..........#####........."
+			"..........#####........."
+			"..........#####........."
+			"...........###..........";
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprBalloon->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+			if (sBalloonMap[i] == '#')
+			{
+				sprBalloon->pColData[i] = C64Color.White;
+				continue;
+			}
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprBalloon->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+
+		}
+
+		decBalloon = new olc::Decal(sprBalloon);
+
+		
+
 	}
 
 };
