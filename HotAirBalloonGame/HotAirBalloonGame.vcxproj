@@ -143,6 +143,9 @@
     <None Include="WASM\pge.wasm" />
     <None Include="WASM\pge2wasm.bat" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assests\olcbanner.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

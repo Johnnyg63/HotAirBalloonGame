@@ -16,6 +16,9 @@
     <Filter Include="WASM">
       <UniqueIdentifier>{3114e7a1-effd-4a25-8f6f-ca8c639d6dd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assests">
+      <UniqueIdentifier>{29ab27cc-21dc-435e-a200-e5a888abb9e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HotAirBalloon.cpp">
@@ -43,5 +46,10 @@
     <None Include="WASM\basic_template.html">
       <Filter>WASM</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assests\olcbanner.png">
+      <Filter>assests</Filter>
+    </Image>
   </ItemGroup>
 </Project>
