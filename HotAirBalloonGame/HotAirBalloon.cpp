@@ -9,6 +9,7 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
+
 // Override base class with your custom functionality
 class Example : public olc::PixelGameEngine
 {
@@ -53,6 +54,8 @@ public:
 		
 	};
 
+	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes;
+
 	// C64 colour palette
 	C64Color C64Color;
 	
@@ -75,15 +78,21 @@ public:
 public:
 	bool OnUserCreate() override
 	{
-		// Called once at the start, so create things here
+		// Lets build up our colour code (will make life easier later
+		C64LoadColourCodes();
+
 		return true;
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		// Called once per frame, draws random coloured pixels
-		DisplayC64Screen();
-		DisplayC64Header();
+		FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
+		if (GetKey(olc::Key::LEFT).bHeld) C64LoadingScreen();
+		C64DisplayScreen();
+		C64DisplayHeader();
+		
+
 
 		return true;
 	}
@@ -91,20 +100,63 @@ public:
 
 private:
 
-
-	void DisplayC64Screen()
+	void C64LoadColourCodes()
 	{
-		Clear(C64Color.LightBlue);
+		vecC64ColourCodes.clear();
+		vecC64ColourCodes.push_back({ 0, C64Color.Black });
+		vecC64ColourCodes.push_back({ 1, C64Color.DarkGrey });
+		vecC64ColourCodes.push_back({ 2, C64Color.Grey });
+		vecC64ColourCodes.push_back({ 3, C64Color.LightGrey });
 
-		FillRect({ 20,20 }, { 280, 160 }, C64Color.Blue);
+		vecC64ColourCodes.push_back({ 4, C64Color.White });
+		vecC64ColourCodes.push_back({ 5, C64Color.Red });
+		vecC64ColourCodes.push_back({ 6, C64Color.LightRed });
+		vecC64ColourCodes.push_back({ 7, C64Color.Brown });
+
+		vecC64ColourCodes.push_back({ 8, C64Color.Orange });
+		vecC64ColourCodes.push_back({ 9, C64Color.Yellow });
+		vecC64ColourCodes.push_back({ 10, C64Color.LightGreen });
+		vecC64ColourCodes.push_back({ 11, C64Color.Green });
+
+		vecC64ColourCodes.push_back({ 12, C64Color.Cyan });
+		vecC64ColourCodes.push_back({ 13, C64Color.LightBlue });
+		vecC64ColourCodes.push_back({ 14, C64Color.Blue });
+		vecC64ColourCodes.push_back({ 15, C64Color.Purple });
 
 	}
 
-	void DisplayC64Header()
+	void C64DisplayScreen()
+	{
+		
+
+		FillRectDecal({ 20,20 }, { 280, 160 }, C64Color.Blue);
+
+	}
+
+	void C64DisplayHeader()
 	{
 		DrawStringPropDecal({ 45, 30 }, strHeaderText1, C64Color.LightBlue, {1.0f, 0.8f});
 		DrawStringPropDecal({ 30, 40 }, strHeaderText2, C64Color.LightBlue, {1.0f, 0.8f});
 		DrawStringPropDecal({ 22, 60 }, strReady, C64Color.LightBlue, { 1.0f, 0.8f });
+	}
+
+	void C64LoadingScreen()
+	{
+		int nC64PixelID;
+		olc::Pixel p = olc::BLACK;
+		for (int y = 0; y < ScreenHeight(); y += 10)
+		{
+			nC64PixelID = std::rand() % 16;
+			for (auto c : vecC64ColourCodes)
+			{
+				if (c.first == nC64PixelID)
+				{
+					p = c.second;
+					break;
+				};
+			}
+			FillRectDecal({ 0.0f, (float)y }, { (float)ScreenWidth(), 10.0f }, p);
+		}
 	}
 
 };
