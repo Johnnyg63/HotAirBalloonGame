@@ -144,6 +144,7 @@
     <None Include="WASM\pge2wasm.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assests\C64LevelOne.png" />
     <Image Include="assests\olcbanner.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

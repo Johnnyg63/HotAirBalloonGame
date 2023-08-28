@@ -51,5 +51,8 @@
     <Image Include="assests\olcbanner.png">
       <Filter>assests</Filter>
     </Image>
+    <Image Include="assests\C64LevelOne.png">
+      <Filter>assests</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -29,6 +29,9 @@ public:
 	olc::Sprite* sprBalloon;
 	olc::Decal* decBalloon;
 
+	olc::Sprite* sprC64Level;
+	olc::Decal* decC64Level;
+
 
 	/* C64 Colour Code Pixels */
 	// Thank you too: https://lospec.com/palette-list/commodore64 
@@ -59,8 +62,6 @@ public:
 		
 	};
 
-	
-
 	// C64 colour palette
 	C64Color C64Color;
 	
@@ -72,10 +73,14 @@ public:
 	std::string strHeaderText2 = "64K RAM SYSTEM 38911 BASIC BYTES FREE";
 	std::string strReady = "READY.";
 	std::string strLoad = "LOAD";
+	std::string strPlay = "PRESS PLAY ON TAPE";
 	std::string strLoading = "LOADING...";
 	std::string strRun = "RUN...";
 
-
+	/* Game Vars */
+	bool bGameLoaded = false;
+	bool bGameLoading = false;
+	bool bStartRec = false;
 
 
 
@@ -87,6 +92,8 @@ public:
 
 		C64CreateBalloonSprite();
 
+		LoadLevel(1);
+
 		return true;
 	}
 
@@ -94,24 +101,39 @@ public:
 	{
 		// Called once per frame, draws random coloured pixels
 		SetDrawTarget(nullptr);
-		Clear(olc::BLANK);
-		FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
-		if (GetKey(olc::Key::LEFT).bHeld) C64LoadingScreen();
-		C64DisplayScreen();
-		C64DisplayHeader();
 		
-		if (GetMouse(0).bHeld)
+		if (GetKey(olc::SPACE).bPressed) bStartRec = true;
+
+		if (!bStartRec) return true;
+
+		
+		if (!bGameLoaded)
 		{
-			DrawDecal(GetMousePos(), decBalloon);
+			FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
+			// We display the C64 screen and loading screen until the 'game' is loaded
+			if (bGameLoading) C64LoadingScreen();
+			C64DisplayScreen();
+			C64DisplayHeader(fElapsedTime);
+			
+			return true;
 		}
+
+		FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.Blue);
 		
-		//DrawSprite(GetMousePos(), sprBalloon);
+		// Lets get the party going
+		// first up we need a background
+		DrawDecal({ 0, 40 }, decC64Level);
+		
+		if (GetMouse(0).bHeld) DrawDecal(GetMousePos(), decBalloon);
+
 
 		return true;
 	}
 
 
 private:
+
+	float fDisplayTime = 0.0f;
 
 	void C64LoadColourCodes()
 	{
@@ -145,11 +167,21 @@ private:
 
 	}
 
-	void C64DisplayHeader()
+	void C64DisplayHeader(float fElapsedTime)
 	{
+		fDisplayTime += fElapsedTime;
+		bGameLoading = false;
 		DrawStringPropDecal({ 45, 30 }, strHeaderText1, C64Color.LightBlue, {1.0f, 0.8f});
 		DrawStringPropDecal({ 30, 40 }, strHeaderText2, C64Color.LightBlue, {1.0f, 0.8f});
 		DrawStringPropDecal({ 22, 60 }, strReady, C64Color.LightBlue, { 1.0f, 0.8f });
+
+		if (fDisplayTime > 2.0f) DrawStringPropDecal({ 22, 70 }, strLoad, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 3.0f) DrawStringPropDecal({ 22, 90 }, strPlay, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 5.0f) DrawStringPropDecal({ 22, 100 }, strLoading, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 5.0 && fDisplayTime < 8.0) { bGameLoading = true; }
+		if (fDisplayTime > 8.0f) DrawStringPropDecal({ 22, 110 }, strRun, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 10.5f) bGameLoaded = true;
+
 	}
 
 	void C64LoadingScreen()
@@ -227,6 +259,18 @@ private:
 
 	}
 
+private:
+
+	void LoadLevel(int8_t nLevel)
+	{
+		// for this demo there will only be one level
+		// but add more as you wish
+		
+		// 1: We need the level graphics
+		// CopyRight: https://www.spriters-resource.com/commodore_64/gianasisters30thanniversaryhack/sheet/199050/
+		sprC64Level = new olc::Sprite("./assests/C64LevelOne.png");
+		decC64Level = new olc::Decal(sprC64Level);
+	}
 };
 
 int main()
