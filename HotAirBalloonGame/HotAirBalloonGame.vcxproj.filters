@@ -29,6 +29,12 @@
     <ClInclude Include="olcPixelGameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="olcPGEX_TransformedView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="olcUTIL_Camera2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WASM\pge.html">
