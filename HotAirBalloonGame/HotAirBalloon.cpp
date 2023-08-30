@@ -235,8 +235,8 @@ public:
 	olc::TileTransformedView tv;
 
 	// Conveninet constants to define tile map world
-	olc::vi2d m_vWorldSize = { 64, 10 }; // 2048 64 cells
-	olc::vi2d m_vTileSize = { 32, 20 };  
+	olc::vi2d m_vWorldSize = { 128, 15 }; // 2048 64 cells
+	olc::vi2d m_vTileSize = { 16, 16 };  
 
 	// The camera!
 	olc::utils::Camera2D camera;
@@ -265,37 +265,18 @@ public:
 		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld) vVel += {+1, 0}; // right
 		vTrackedPoint += vVel * 4.0f * fElapsedTime;
 
-		// Some controlls
-		if (vTrackedPoint.x < 0.05f) vTrackedPoint.x = 0.05f;
-		if (vTrackedPoint.x > 63.0f) vTrackedPoint.x = 63.0f;
+		// Some borders 
+		if (vTrackedPoint.x < 0.00f) vTrackedPoint.x = 0.00f;
+		if (vTrackedPoint.x > m_vWorldSize.x) vTrackedPoint.x = 128.0f;
+		if (vTrackedPoint.y < 0.01f) vTrackedPoint.y = 0.01f;
+		if (vTrackedPoint.y > m_vWorldSize.y) vTrackedPoint.y = 15.0f;
 
-		// Switch between "free roam" and "play" mode with TAB key
-		if (GetKey(olc::Key::TAB).bPressed)
-		{
-			// Always setup camera to play mode when tab key pressed
-			tv.SetWorldOffset(camera.GetViewPosition());
-			tv.SetWorldScale(m_vTileSize);
-			bFreeRoam = !bFreeRoam;
-		}
 
-		// Switch camera mode in operation
-		if (GetKey(olc::Key::K1).bPressed)
-			camera.SetMode(olc::utils::Camera2D::Mode::Simple);
-		if (GetKey(olc::Key::K2).bPressed)
-			camera.SetMode(olc::utils::Camera2D::Mode::EdgeMove);
-		if (GetKey(olc::Key::K3).bPressed)
-			camera.SetMode(olc::utils::Camera2D::Mode::LazyFollow);
-		if (GetKey(olc::Key::K4).bPressed)
-			camera.SetMode(olc::utils::Camera2D::Mode::FixedScreens);
-
-		// Update the camera, if teh tracked object remains visible, 
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
 
-		// In "play" mode, set the transformed view to that required by
-		// the camera
-		if (!bFreeRoam)
-			tv.SetWorldOffset(camera.GetViewPosition());
+		// Set the transformed view to that required by the camera
+		tv.SetWorldOffset(camera.GetViewPosition());
 
 		// Render "tile map", by getting visible tiles
 		olc::vi2d vTileTL = tv.GetTopLeftTile().max({ 0,0 });
@@ -307,33 +288,57 @@ public:
 			{
 				int idx = vTile.y * m_vWorldSize.x + vTile.x;
 
-				if (vWorldMap[idx] == 0)
+				if (vTile.y > 4)
+				{
+					// We now need the SpriteSheet position
+					// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
+					// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
+					// therefore we need some offsets
+					olc::vi2d vSourcePos = { vTile.x, vTile.y - 5 }; // SpriteSheet Title position
+					vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
+
+					// OK now we get where in our realWorld to draw the decal
+					olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
+					tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
+				}
+				else
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+				}
+
+
+				/*if (vWorldMap[idx] == 0)
 					tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(40, 40, 40));
 
 				if (vWorldMap[idx] == 1)
-					tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60));
+				{
+					
+				}*/
+					//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60));
+
+				
+
 			}
 
-		// Draw the "player" as a 1x1 cell
+		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(0.5f, 0.5f), decBalloon);
-		olc::vi2d vGVPos = { (int32_t)camera.GetViewPosition().x, (int32_t)camera.GetViewPosition().y };
-		float posX = std::min((vTrackedPoint.x * 31), (decC64Level->sprite->Size().x - 320.0f));
-		DrawPartialDecal({ 0.0f, 40.0f }, { 320.0f, 160.0f }, decC64Level, { posX, 0}, {300.0f, 160.0f});
-		//tv.FillRectDecal(vTrackedPoint - olc::vf2d(0.5f, 0.5f), { 1.0f, 1.0f }, olc::BLUE);
 
-		// Overlay with information
-		if (bFreeRoam)
+		/*DrawStringPropDecal({ 2,12 }, "WASD  : Move", olc::YELLOW);
+
+		DrawStringPropDecal({ 2,42 }, vTrackedPoint.str(), olc::YELLOW);*/
+
+		if (GetMouse(0).bHeld)
 		{
-			tv.FillRectDecal(camera.GetViewPosition(), camera.GetViewSize(), olc::PixelF(255.0f, 0.0f, 0.0f, 0.5f));
-			DrawStringPropDecal({ 2, 2 }, "TAB: Free Mode, M-Btn to Pan & Zoom", olc::YELLOW);
+			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
+		
 		}
-		else
-			DrawStringPropDecal({ 2,2 }, "TAB: Play Mode", olc::YELLOW);
 
-		DrawStringPropDecal({ 2,12 }, "WASD  : Move", olc::YELLOW);
-		DrawStringPropDecal({ 2,22 }, "CAMERA: 1) Simple  2) EdgeMove  3) LazyFollow  4) Screens", olc::YELLOW);
-		DrawStringPropDecal({ 2,42 }, vTrackedPoint.str(), olc::YELLOW);
 	}
+
+	// Game Save
+	private:
+
+
 
 public:
 	bool OnUserCreate() override
@@ -354,15 +359,14 @@ public:
 
 		// Configure Camera
 		camera.SetTarget(vTrackedPoint);
-		camera.SetMode(olc::utils::Camera2D::Mode::LazyFollow);
+		camera.SetMode(olc::utils::Camera2D::Mode::Simple);
 		camera.SetWorldBoundary({ 0.0f, 0.0f }, m_vWorldSize);
 		camera.EnableWorldBoundary(true);
 
 		// Create "tile map" world with just two tiles
-		size_t mapSize = m_vWorldSize.x * m_vWorldSize.y;
-		vWorldMap.resize(mapSize);
+		vWorldMap.resize(m_vWorldSize.x * m_vWorldSize.y);
 
-		// TODO: Add load code here
+		// Set default
 		for (int i = 0; i < vWorldMap.size(); i++)
 			vWorldMap[i] = ((rand() % 20) == 1) ? 1 : 0;
 
@@ -414,7 +418,7 @@ public:
 int main()
 {
 	Example demo;
-	if (demo.Construct(320, 200, 4, 4))
+	if (demo.Construct(320, 240, 4, 3))
 		demo.Start();
 	return 0;
 }
