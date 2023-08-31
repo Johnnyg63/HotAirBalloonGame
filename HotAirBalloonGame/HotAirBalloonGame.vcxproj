@@ -139,6 +139,7 @@
     <ClInclude Include="olcUTIL_Camera2D.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\levelone.bin" />
     <None Include="WASM\basic_template.html" />
     <None Include="WASM\pge.html" />
     <None Include="WASM\pge.js" />
@@ -146,8 +147,8 @@
     <None Include="WASM\pge2wasm.bat" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assests\C64LevelOne.png" />
-    <Image Include="assests\olcbanner.png" />
+    <Image Include="assets\C64LevelOne.png" />
+    <Image Include="assets\olcbanner.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

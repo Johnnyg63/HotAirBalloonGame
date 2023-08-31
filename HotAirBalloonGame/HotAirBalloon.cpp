@@ -224,7 +224,7 @@ private:
 
 		// 1: We need the level graphics
 		// CopyRight: https://www.spriters-resource.com/commodore_64/gianasisters30thanniversaryhack/sheet/199050/
-		sprC64Level = new olc::Sprite("./assests/C64LevelOne.png");
+		sprC64Level = new olc::Sprite("./assets/C64LevelOne.png");
 		decC64Level = new olc::Decal(sprC64Level);
 	}
 
@@ -294,6 +294,24 @@ public:
 					// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
 					// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
 					// therefore we need some offsets
+					
+				}
+				else
+				{
+					
+				}
+
+				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+
+
+				if (vWorldMap[idx] == 0)
+				{
+					tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+				}
+
+				if (vWorldMap[idx] == 1)
+				{
+					//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 					olc::vi2d vSourcePos = { vTile.x, vTile.y - 5 }; // SpriteSheet Title position
 					vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
 
@@ -301,10 +319,8 @@ public:
 					olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
 					tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
 				}
-				else
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
-				}
+
+				
 
 
 				/*if (vWorldMap[idx] == 0)
@@ -327,18 +343,85 @@ public:
 
 		DrawStringPropDecal({ 2,42 }, vTrackedPoint.str(), olc::YELLOW);*/
 
-		if (GetMouse(0).bHeld)
+		if (GetMouse(0).bHeld || GetMouse(0).bPressed)
 		{
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
-		
+			//tv.FillRectDecal(vTilePos, {1.0, 1.0}, C64Color.Cyan);
+
+			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
+			vWorldMap[idx] = 1;
 		}
+		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
+		{
+			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
+			//tv.FillRectDecal(vTilePos, {1.0, 1.0}, C64Color.Cyan);
+
+			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
+			vWorldMap[idx] = 0;
+		}
+
+
+		if (GetKey(olc::K1).bPressed)
+		{
+			// load a file
+			//SaveMap("./assets/levels/Level1_Test2.ice");
+			LoadMap("./assets/levelone.bin");
+		}
+
+		if (GetKey(olc::K2).bPressed)
+		{
+			// Save a file
+			SaveMap("./assets/levelone.bin");
+		}
+
+		if (GetKey(olc::K3).bPressed)
+		{
+			// Clear
+			for (int i = 0; i < vWorldMap.size(); i++)
+			{
+				vWorldMap[i] = 0;
+			}
+		}
+
 
 	}
 
 	// Game Save
 	private:
 
+		void LoadMap(std::string sFilename)
+		{
+			std::ifstream file(sFilename, std::ios::in | std::ios::binary);
 
+			if (file.is_open())
+			{
+				file.read((char*)&m_vWorldSize, sizeof(olc::vi2d));
+				file.read((char*)&m_vTileSize, sizeof(olc::vi2d));
+
+				for (int i = 0; i < vWorldMap.size(); i++)
+				{
+					file.read((char*)&vWorldMap[i], sizeof(uint8_t));
+				}
+
+				file.close();
+			}
+
+			
+		}
+
+		void SaveMap(std::string sFilename)
+		{
+			std::ofstream file(sFilename, std::ios::out | std::ios::binary);
+			file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
+			file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
+
+			for (int i = 0; i < vWorldMap.size(); i++)
+			{
+				file.write((char*)&vWorldMap[i], sizeof(uint8_t));
+			}
+
+			file.close();
+		}
 
 public:
 	bool OnUserCreate() override
@@ -367,8 +450,12 @@ public:
 		vWorldMap.resize(m_vWorldSize.x * m_vWorldSize.y);
 
 		// Set default
+		/*for (int i = 0; i < vWorldMap.size(); i++)
+			vWorldMap[i] = ((rand() % 20) == 1) ? 1 : 0;*/
 		for (int i = 0; i < vWorldMap.size(); i++)
-			vWorldMap[i] = ((rand() % 20) == 1) ? 1 : 0;
+		{
+			vWorldMap[i] = 0;
+		}
 
 		// Set background colour
 		Clear(C64Color.Blue);

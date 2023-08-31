@@ -16,8 +16,8 @@
     <Filter Include="WASM">
       <UniqueIdentifier>{3114e7a1-effd-4a25-8f6f-ca8c639d6dd1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="assests">
-      <UniqueIdentifier>{29ab27cc-21dc-435e-a200-e5a888abb9e2}</UniqueIdentifier>
+    <Filter Include="assets">
+      <UniqueIdentifier>{49057d2e-40d8-4642-be8b-22da8e0ce56a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,13 +52,16 @@
     <None Include="WASM\basic_template.html">
       <Filter>WASM</Filter>
     </None>
+    <None Include="assets\levelone.bin">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assests\olcbanner.png">
-      <Filter>assests</Filter>
+    <Image Include="assets\C64LevelOne.png">
+      <Filter>assets</Filter>
     </Image>
-    <Image Include="assests\C64LevelOne.png">
-      <Filter>assests</Filter>
+    <Image Include="assets\olcbanner.png">
+      <Filter>assets</Filter>
     </Image>
   </ItemGroup>
 </Project>
