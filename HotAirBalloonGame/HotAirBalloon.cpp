@@ -78,7 +78,6 @@ public:
 		uint8_t SetBlockHero = -110; // Sets a block for Hero collison
 		uint8_t SetBlockEmemies = -120; // Sets a block for Ememies collison
 
-
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
 		uint8_t DarkGrey = 1;	// Set the tile to this C64 Colour
 		uint8_t Grey = 2;		// Set the tile to this C64 Colour
@@ -270,6 +269,18 @@ public:
 	// Transformed view object to make world offsetting simple
 	olc::TileTransformedView tv;
 
+	struct sWorldObject
+	{
+		olc::vf2d vPos;
+		olc::vf2d vVel;
+		float fRadius = 2.0f;
+		olc::Decal* decObject = nullptr;
+
+	};
+
+	sWorldObject objectPlayer;
+	bool bFollowObject = false;
+
 	// Conveninet constants to define tile map world
 	olc::vi2d m_vWorldSize = { 256, 30 }; // 2048 64 cells
 	olc::vi2d m_vTileSize = { 8, 8 };  
@@ -299,16 +310,19 @@ public:
 	std::vector<uint8_t> vWorldMap;
 	std::vector<uint8_t> vWorldMap_undo;
 
+
+
+
 	void TestCode(float fElapsedTime)
 	{
 		
 		// Handle player "physics" in response to key presses
-		olc::vf2d vVel = { 0.0f, 0.0f };
-		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld) vVel += {0, -1}; // up
-		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld) vVel += {0, +1}; // down
-		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld) vVel += {-1, 0}; // left
-		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld) vVel += {+1, 0}; // right
-		vTrackedPoint += vVel * 4.0f * fElapsedTime;
+		objectPlayer.vVel = { 0.0f, 0.0f };
+		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld) objectPlayer.vVel += {0, -1}; // up
+		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld) objectPlayer.vVel += {0, +1}; // down
+		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld) objectPlayer.vVel += {-1, 0}; // left
+		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld) objectPlayer.vVel += {+1, 0}; // right
+		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
 
 		// Some borders 
 		if (vTrackedPoint.x < 0.00f) vTrackedPoint.x = 0.00f;
@@ -322,6 +336,20 @@ public:
 
 		// Set the transformed view to that required by the camera
 		tv.SetWorldOffset(camera.GetViewPosition());
+
+		/// coll
+		// Where will object be worst case?
+		olc::vf2d vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * fElapsedTime;
+
+		// Extract region of world cells that could have collision this frame
+		olc::vi2d vCurrentCell = objectPlayer.vPos.floor();
+		olc::vi2d vTargetCell = vPotentialPosition;
+		olc::vi2d vAreaTL = (vCurrentCell.min(vTargetCell) - olc::vi2d(1, 1)).max({ 0,0 });
+		olc::vi2d vAreaBR = (vCurrentCell.max(vTargetCell) + olc::vi2d(1, 1)).min(m_vWorldSize);
+
+		olc::vf2d vRayToNearest;
+
+
 
 		// Render "tile map", by getting visible tiles
 		olc::vi2d vTileTL = tv.GetTopLeftTile().max({ 0,0 });
@@ -341,8 +369,43 @@ public:
 				{
 					if (bShowGrid && bShowGridPlayer) {
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
-						continue;
+						//continue;
 					}
+
+					// ...it is! So work out nearest point to future player position, around perimeter
+					// of cell rectangle. We can test the distance to this point to see if we have
+					// collided. 
+
+					olc::vf2d vNearestPoint;
+					vNearestPoint.x = std::max(float(vTile.x), std::min(vPotentialPosition.x, float(vTile.x + 1)));
+					vNearestPoint.y = std::max(float(vTile.y), std::min(vPotentialPosition.y, float(vTile.y + 1)));
+
+					olc::vf2d vRayToNearest = vNearestPoint - vPotentialPosition;
+					float fOverlap = objectPlayer.fRadius - vRayToNearest.mag();
+					if (std::isnan(fOverlap)) fOverlap = 0;
+
+					// If overlap is positive, then a collision has occurred, so we displace backwards by the 
+					// overlap amount. The potential position is then tested against other tiles in the area
+					// therefore "statically" resolving the collision
+					if (fOverlap > 0)
+					{
+						// Statically resolve the collision
+						vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;
+					}
+
+					// Set the objects new position to the allowed potential position
+					objectPlayer.vPos = vPotentialPosition;
+					vTrackedPoint = vPotentialPosition;
+					// Draw Boundary
+					//tv.FillRectDecal(objectPlayer.vPos, {objectPlayer.fRadius, objectPlayer.fRadius}, olc::WHITE);
+					
+
+					// Draw Velocity
+					if (objectPlayer.vVel.mag2() > 0)
+					{
+						tv.DrawLineDecal(objectPlayer.vPos, objectPlayer.vPos + objectPlayer.vVel.norm() * objectPlayer.fRadius, olc::MAGENTA);
+					}
+
 				}
 
 				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
@@ -539,7 +602,7 @@ public:
 			LoadMap("./assets/levelone.bin");
 		}
 
-		if (GetKey(olc::S).bPressed)
+		if (GetKey(olc::R).bPressed)
 		{
 			// Save a file
 			SaveMap("./assets/levelone.bin");
@@ -564,29 +627,50 @@ public:
 
 		}
 
-		if (GetKey(olc::G).bHeld && GetKey(olc::K1).bPressed)
+		if (GetKey(olc::K1).bPressed)
 		{
 			bShowGridPlayer = true;
-			bShowGridPlayer = false;
-			bShowGridPlayer = false;
+			bShowGridHero = false;
+			bShowGridEmemies = false;
 		}
 
 
-		if (GetKey(olc::G).bHeld && GetKey(olc::K2).bPressed)
+		if (GetKey(olc::K2).bPressed)
 		{
 			bShowGridPlayer = false;
-			bShowGridPlayer = true;
-			bShowGridPlayer = false;
+			bShowGridHero = true;
+			bShowGridEmemies = false;
 		}
 			
-		if (GetKey(olc::G).bHeld && GetKey(olc::K3).bPressed) 
+		if (GetKey(olc::K3).bPressed) 
 		{
 			bShowGridPlayer = false;
-			bShowGridPlayer = false;
-			bShowGridPlayer = true;
+			bShowGridHero = false;
+			bShowGridEmemies = true;
 		}
 
+		
+
 	}
+
+	// lets get the collision
+	void TestCode2(float fElapsedTime)
+	{
+		// Control of Player Object
+		objectPlayer.vVel = { 0.0f, 0.0f };
+		if (GetKey(olc::Key::W).bHeld) objectPlayer.vVel += { 0.0f, -1.0f };
+		if (GetKey(olc::Key::S).bHeld) objectPlayer.vVel += { 0.0f, +1.0f };
+		if (GetKey(olc::Key::A).bHeld) objectPlayer.vVel += { -1.0f, 0.0f };
+		if (GetKey(olc::Key::D).bHeld) objectPlayer.vVel += { +1.0f, 0.0f };
+
+		if (objectPlayer.vVel.mag2() > 0)
+			objectPlayer.vVel = objectPlayer.vVel.norm() * (GetKey(olc::Key::SHIFT).bHeld ? 5.0f : 2.0f);
+
+		if (GetKey(olc::Key::SPACE).bReleased) bFollowObject = !bFollowObject;
+
+
+	}
+
 
 	// Game Save
 	private:
@@ -692,6 +776,9 @@ public:
 
 		// Load Level 1
 		LoadLevel(1);
+
+		objectPlayer.vPos = { 3.0f, 3.0f };
+		objectPlayer.decObject = new olc::Decal(sprBalloon);
 
 		// Set background colour
 		Clear(C64Color.Blue);
