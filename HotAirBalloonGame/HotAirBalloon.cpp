@@ -284,7 +284,11 @@ public:
 	// Flag whether we are in "free roam" or "play" mode
 	bool bFreeRoam = false;
 
-	bool bShowGrid = false;
+	bool bShowGrid = false; // Hide/Show grid
+	bool bShowGridPlayer = false; // Hide/Show grid
+	bool bShowGridHero = false; // Hide/Show grid
+	bool bShowGridEmemies = false; // Hide/Show grid
+
 
 	// The world map, stored as a 1D array of graphics
 	std::vector<uint8_t> vWorldMapGraphics;
@@ -335,7 +339,7 @@ public:
 				// Lets get our collison
 				if (vWorldMap[idx] == C64FileTileKey.SetBlockPlayer)
 				{
-					if (bShowGrid) {
+					if (bShowGrid && bShowGridPlayer) {
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
 						continue;
 					}
@@ -343,25 +347,34 @@ public:
 
 				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
 				{
-					if (bShowGrid) tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
-					continue;
+					if (bShowGrid && bShowGridHero)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
+						continue;
+					}
 				}
 
 				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
 				{
-					if (bShowGrid) tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
-					continue;
+					if (bShowGrid && bShowGridEmemies)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
+						continue;
+					}
+					
 				}
 
 				// TODO: Needs refactoring... no time in Jam time
 				if (vWorldMapGraphics[idx] == C64FileTileKey.Blank)
 				{
-					if(bShowGrid) tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+					if (bShowGrid)
+					{
+						tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+					}
+						
 					
 				}
 
-
-				
 				if (vWorldMapGraphics[idx] == C64FileTileKey.GetSprite)
 				{
 					if (vTile.y > 8)
@@ -504,7 +517,10 @@ public:
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
 			//vWorldMapGraphics[idx] = C64FileTileKey.Black;
-			vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
+			if(bShowGridPlayer) vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
+			if (bShowGridHero) vWorldMap[idx] = C64FileTileKey.SetBlockHero;
+			if (bShowGridEmemies) vWorldMap[idx] = C64FileTileKey.SetBlockEmemies;
+			
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
@@ -516,33 +532,59 @@ public:
 		}
 
 
-		if (GetKey(olc::K1).bPressed)
+		if (GetKey(olc::L).bPressed)
 		{
 			// load a file
 			
 			LoadMap("./assets/levelone.bin");
 		}
 
-		if (GetKey(olc::K2).bPressed)
+		if (GetKey(olc::S).bPressed)
 		{
 			// Save a file
 			SaveMap("./assets/levelone.bin");
 		}
 
-		if (GetKey(olc::K3).bPressed)
+		if (GetKey(olc::C).bPressed)
 		{
 			// Clear
 			for (int i = 0; i < vWorldMapGraphics.size(); i++)
 			{
-				vWorldMapGraphics[i] = 0;
+				vWorldMapGraphics[i] = C64FileTileKey.Blank;
+				vWorldMap[i] = C64FileTileKey.Blank;
 			}
 		}
 
 		if (GetKey(olc::G).bPressed)
 		{
 			bShowGrid = !bShowGrid;
+			bShowGridPlayer = false;
+			bShowGridHero = false;
+			bShowGridEmemies = false;
+
 		}
 
+		if (GetKey(olc::G).bHeld && GetKey(olc::K1).bPressed)
+		{
+			bShowGridPlayer = true;
+			bShowGridPlayer = false;
+			bShowGridPlayer = false;
+		}
+
+
+		if (GetKey(olc::G).bHeld && GetKey(olc::K2).bPressed)
+		{
+			bShowGridPlayer = false;
+			bShowGridPlayer = true;
+			bShowGridPlayer = false;
+		}
+			
+		if (GetKey(olc::G).bHeld && GetKey(olc::K3).bPressed) 
+		{
+			bShowGridPlayer = false;
+			bShowGridPlayer = false;
+			bShowGridPlayer = true;
+		}
 
 	}
 
