@@ -42,7 +42,7 @@ public:
 	/* C64 Colour Code Pixels */
 	// Thank you too: https://lospec.com/palette-list/commodore64 
 	// Holds the correct RGB Colours codes for C64
-	struct C64Color
+	struct C64Colors
 	{
 		olc::Pixel Black = { 0, 0, 0, 255 };			// - #000000
 		olc::Pixel DarkGrey = { 98, 98, 98, 255 };		// - #626262
@@ -67,7 +67,35 @@ public:
 		
 	};
 
-	C64Color C64Color; // C64 colour palette
+	C64Colors C64Color; // C64 colour palette
+
+	struct C64FileTileKeys
+	{
+		uint8_t Blank = -1;		// Set the tile to blank
+		uint8_t GetSprite = -2;	// Fill the title with the sprite from sprite sheet
+
+		uint8_t Black = 0;		// Set the tile to this C64 Colour
+		uint8_t DarkGrey = 1;	// Set the tile to this C64 Colour
+		uint8_t Grey = 2;		// Set the tile to this C64 Colour
+		uint8_t LightGrey = 3;	// Set the tile to this C64 Colour
+
+		uint8_t White = 4;		// Set the tile to this C64 Colour
+		uint8_t Red = 5;		// Set the tile to this C64 Colour
+		uint8_t LightRed = 6;	// Set the tile to this C64 Colour
+		uint8_t Brown = 7;		// Set the tile to this C64 Colour
+
+		uint8_t Orange = 8;		// Set the tile to this C64 Colour
+		uint8_t Yellow = 9;		// Set the tile to this C64 Colour
+		uint8_t LightGreen = 10;// Set the tile to this C64 Colour
+		uint8_t Green = 11;		// Set the tile to this C64 Colour
+
+		uint8_t Cyan = 12;		// Set the tile to this C64 Colour
+		uint8_t LightBlue = 13;	// Set the tile to this C64 Colour
+		uint8_t Blue = 14;		// Set the tile to this C64 Colour
+		uint8_t Purple = 15;	// Set the tile to this C64 Colour
+
+	};
+	C64FileTileKeys C64FileTileKey;
 
 
 	/* Game Vars */
@@ -226,6 +254,9 @@ private:
 		// CopyRight: https://www.spriters-resource.com/commodore_64/gianasisters30thanniversaryhack/sheet/199050/
 		sprC64Level = new olc::Sprite("./assets/C64LevelOne.png");
 		decC64Level = new olc::Decal(sprC64Level);
+
+		LoadMap("./assets/Levelone.bin");
+
 	}
 
 	// Transform View Stuff
@@ -235,8 +266,8 @@ public:
 	olc::TileTransformedView tv;
 
 	// Conveninet constants to define tile map world
-	olc::vi2d m_vWorldSize = { 128, 15 }; // 2048 64 cells
-	olc::vi2d m_vTileSize = { 16, 16 };  
+	olc::vi2d m_vWorldSize = { 256, 30 }; // 2048 64 cells
+	olc::vi2d m_vTileSize = { 8, 8 };  
 
 	// The camera!
 	olc::utils::Camera2D camera;
@@ -248,15 +279,14 @@ public:
 	// Flag whether we are in "free roam" or "play" mode
 	bool bFreeRoam = false;
 
+	bool bShowGrid = false;
+
 	// The world map, stored as a 1D array
 	std::vector<uint8_t> vWorldMap;
 
 	void TestCode(float fElapsedTime)
 	{
-		// In free roam, middle mouse button pans & zooms
-		if (bFreeRoam)
-			tv.HandlePanAndZoom();
-
+		
 		// Handle player "physics" in response to key presses
 		olc::vf2d vVel = { 0.0f, 0.0f };
 		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld) vVel += {0, -1}; // up
@@ -288,49 +318,47 @@ public:
 			{
 				int idx = vTile.y * m_vWorldSize.x + vTile.x;
 
-				if (vTile.y > 4)
-				{
-					// We now need the SpriteSheet position
-					// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
-					// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
-					// therefore we need some offsets
-					
-				}
-				else
-				{
-					
-				}
-
 				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+				//if (vTile.y > 9)
+				//{
+				//	// We now need the SpriteSheet position
+				//	// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
+				//	// We do not care about the space below 80 realworld / 10 view world, and we dont care about the width
+				//	// therefore we need some offsets
+				//		//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
+				//	olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
+				//	vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
 
+				//	// OK now we get where in our realWorld to draw the decal
+				//	olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
+				//	tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
 
-				if (vWorldMap[idx] == 0)
+				//}
+
+				if (vWorldMap[idx] == C64FileTileKey.Blank)
 				{
-					tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+					if(bShowGrid) tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
 				}
 
-				if (vWorldMap[idx] == 1)
+				if (vWorldMap[idx] == C64FileTileKey.GetSprite)
 				{
-					//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
-					olc::vi2d vSourcePos = { vTile.x, vTile.y - 5 }; // SpriteSheet Title position
-					vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
+					if (vTile.y > 8)
+					{
+						// We now need the SpriteSheet position
+						// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
+						// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
+						// therefore we need some offsets
+							//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
+						olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
+						vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
 
-					// OK now we get where in our realWorld to draw the decal
-					olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
-					tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
-				}
-
+						// OK now we get where in our realWorld to draw the decal
+						olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
+						tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
+						//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
+					}
 				
-
-
-				/*if (vWorldMap[idx] == 0)
-					tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(40, 40, 40));
-
-				if (vWorldMap[idx] == 1)
-				{
-					
-				}*/
-					//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60));
+				}
 
 				
 
@@ -346,18 +374,19 @@ public:
 		if (GetMouse(0).bHeld || GetMouse(0).bPressed)
 		{
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
-			//tv.FillRectDecal(vTilePos, {1.0, 1.0}, C64Color.Cyan);
+			tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMap[idx] = 1;
+			vWorldMap[idx] = C64FileTileKey.GetSprite;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
-			//tv.FillRectDecal(vTilePos, {1.0, 1.0}, C64Color.Cyan);
+			tv.FillRectDecal(vTilePos, {1.0, 1.0}, olc::BLANK);
+			
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMap[idx] = 0;
+			vWorldMap[idx] = C64FileTileKey.Blank;
 		}
 
 
@@ -383,6 +412,11 @@ public:
 			}
 		}
 
+		if (GetKey(olc::G).bPressed)
+		{
+			bShowGrid = !bShowGrid;
+		}
+
 
 	}
 
@@ -405,6 +439,7 @@ public:
 
 				file.close();
 			}
+
 
 			
 		}
@@ -431,8 +466,6 @@ public:
 
 		C64CreateBalloonSprite();
 
-		LoadLevel(1);
-
 		// Construct transform view
 		tv = olc::TileTransformedView(GetScreenSize(), m_vTileSize);
 
@@ -454,8 +487,12 @@ public:
 			vWorldMap[i] = ((rand() % 20) == 1) ? 1 : 0;*/
 		for (int i = 0; i < vWorldMap.size(); i++)
 		{
-			vWorldMap[i] = 0;
+			vWorldMap[i] = C64FileTileKey.Blank;
 		}
+
+
+		// Load Level 1
+		LoadLevel(1);
 
 		// Set background colour
 		Clear(C64Color.Blue);
