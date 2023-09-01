@@ -74,6 +74,11 @@ public:
 		uint8_t Blank = -1;		// Set the tile to blank
 		uint8_t GetSprite = -2;	// Fill the title with the sprite from sprite sheet
 
+		uint8_t SetBlockPlayer = -100; // Sets a block for Player collison
+		uint8_t SetBlockHero = -110; // Sets a block for Hero collison
+		uint8_t SetBlockEmemies = -120; // Sets a block for Ememies collison
+
+
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
 		uint8_t DarkGrey = 1;	// Set the tile to this C64 Colour
 		uint8_t Grey = 2;		// Set the tile to this C64 Colour
@@ -281,12 +286,14 @@ public:
 
 	bool bShowGrid = false;
 
-	// The world map, stored as a 1D array
+	// The world map, stored as a 1D array of graphics
 	std::vector<uint8_t> vWorldMapGraphics;
 	std::vector<uint8_t> vWorldMapGraphics_undo;
 
-	// The world map, stored as a 1D array
-	//std::vector<uint8_t> vWorldMap;
+
+	// The world map, stored as a 1D array for collison
+	std::vector<uint8_t> vWorldMap;
+	std::vector<uint8_t> vWorldMap_undo;
 
 	void TestCode(float fElapsedTime)
 	{
@@ -325,12 +332,34 @@ public:
 				// TODO, Lets just set the background to blue
 				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
 				
+				// Lets get our collison
+				if (vWorldMap[idx] == C64FileTileKey.SetBlockPlayer)
+				{
+					if (bShowGrid) {
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
+						continue;
+					}
+				}
+
+				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
+				{
+					if (bShowGrid) tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
+					continue;
+				}
+
+				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
+				{
+					if (bShowGrid) tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
+					continue;
+				}
+
 				// TODO: Needs refactoring... no time in Jam time
 				if (vWorldMapGraphics[idx] == C64FileTileKey.Blank)
 				{
 					if(bShowGrid) tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
-					continue;
+					
 				}
+
 
 				
 				if (vWorldMapGraphics[idx] == C64FileTileKey.GetSprite)
@@ -474,21 +503,23 @@ public:
 			tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMapGraphics[idx] = C64FileTileKey.Black;
+			//vWorldMapGraphics[idx] = C64FileTileKey.Black;
+			vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
 			// Undo Button
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMapGraphics[idx] = vWorldMapGraphics_undo[idx];
+			//vWorldMapGraphics[idx] = vWorldMapGraphics_undo[idx];
+			vWorldMap[idx] = vWorldMap_undo[idx];
 		}
 
 
 		if (GetKey(olc::K1).bPressed)
 		{
 			// load a file
-			//SaveMap("./assets/levels/Level1_Test2.ice");
+			
 			LoadMap("./assets/levelone.bin");
 		}
 
@@ -532,12 +563,24 @@ public:
 					file.read((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
 				}
 
-				file.close();
+				for (int i = 0; i < vWorldMap.size(); i++)
+				{
+					file.read((char*)&vWorldMap[i], sizeof(uint8_t));
+				}
 
 				for (size_t i = 0; i < vWorldMapGraphics.size(); i++)
 				{
 					vWorldMapGraphics_undo[i] = vWorldMapGraphics[i];
 				}
+
+				for (size_t i = 0; i < vWorldMap.size(); i++)
+				{
+					vWorldMap_undo[i] = vWorldMap[i];
+				}
+
+				file.close();
+
+
 			}
 
 
@@ -551,10 +594,16 @@ public:
 			file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
 			file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-			for (int i = 0; i < vWorldMapGraphics.size(); i++)
+			for (size_t i = 0; i < vWorldMapGraphics.size(); i++)
 			{
 				file.write((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
 			}
+
+			for (size_t i = 0; i < vWorldMap.size(); i++)
+			{
+				file.write((char*)&vWorldMap[i], sizeof(uint8_t));
+			}
+
 
 			file.close();
 		}
@@ -583,12 +632,17 @@ public:
 		// Create "tile map" world with just two tiles
 		vWorldMapGraphics.resize(m_vWorldSize.x * m_vWorldSize.y);
 		vWorldMapGraphics_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMap.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMap_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+
 
 		// Set default
 		/*for (int i = 0; i < vWorldMapGraphics.size(); i++)
 			vWorldMapGraphics[i] = ((rand() % 20) == 1) ? 1 : 0;*/
 		for (int i = 0; i < vWorldMapGraphics.size(); i++)
 		{
+			vWorldMap[i] = C64FileTileKey.Blank;
+			vWorldMap_undo[i] = C64FileTileKey.Blank;
 			vWorldMapGraphics[i] = C64FileTileKey.Blank;
 			vWorldMapGraphics_undo[i] = C64FileTileKey.Blank;
 		}
