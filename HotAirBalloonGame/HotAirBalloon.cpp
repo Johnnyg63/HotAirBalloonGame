@@ -282,7 +282,11 @@ public:
 	bool bShowGrid = false;
 
 	// The world map, stored as a 1D array
-	std::vector<uint8_t> vWorldMap;
+	std::vector<uint8_t> vWorldMapGraphics;
+	std::vector<uint8_t> vWorldMapGraphics_undo;
+
+	// The world map, stored as a 1D array
+	//std::vector<uint8_t> vWorldMap;
 
 	void TestCode(float fElapsedTime)
 	{
@@ -318,29 +322,18 @@ public:
 			{
 				int idx = vTile.y * m_vWorldSize.x + vTile.x;
 
+				// TODO, Lets just set the background to blue
 				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
-				//if (vTile.y > 9)
-				//{
-				//	// We now need the SpriteSheet position
-				//	// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
-				//	// We do not care about the space below 80 realworld / 10 view world, and we dont care about the width
-				//	// therefore we need some offsets
-				//		//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
-				//	olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
-				//	vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
-
-				//	// OK now we get where in our realWorld to draw the decal
-				//	olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
-				//	tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
-
-				//}
-
-				if (vWorldMap[idx] == C64FileTileKey.Blank)
+				
+				// TODO: Needs refactoring... no time in Jam time
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Blank)
 				{
 					if(bShowGrid) tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+					continue;
 				}
 
-				if (vWorldMap[idx] == C64FileTileKey.GetSprite)
+				
+				if (vWorldMapGraphics[idx] == C64FileTileKey.GetSprite)
 				{
 					if (vTile.y > 8)
 					{
@@ -348,7 +341,6 @@ public:
 						// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
 						// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
 						// therefore we need some offsets
-							//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 						olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
 						vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
 
@@ -357,10 +349,115 @@ public:
 						tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
 						//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 					}
+					continue;
 				
 				}
 
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Black)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Black);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Blue)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Brown)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Brown);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Cyan)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Cyan);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.DarkGrey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.DarkGrey);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Green)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Grey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.LightBlue)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightBlue);
+					continue;
+				}
+
 				
+				if (vWorldMapGraphics[idx] == C64FileTileKey.LightGreen)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGreen);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.LightGrey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGrey);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.LightRed)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightRed);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Orange)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Orange);
+					continue;
+				}
+
+				
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Purple)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Purple);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Red)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Red);
+					continue;
+				}
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.White)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.White);
+					continue;
+				}
+
+
+				if (vWorldMapGraphics[idx] == C64FileTileKey.Yellow)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Yellow);
+					continue;
+				}
+
 
 			}
 
@@ -377,16 +474,14 @@ public:
 			tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMap[idx] = C64FileTileKey.GetSprite;
+			vWorldMapGraphics[idx] = C64FileTileKey.Black;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
+			// Undo Button
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
-			tv.FillRectDecal(vTilePos, {1.0, 1.0}, olc::BLANK);
-			
-
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			vWorldMap[idx] = C64FileTileKey.Blank;
+			vWorldMapGraphics[idx] = vWorldMapGraphics_undo[idx];
 		}
 
 
@@ -406,9 +501,9 @@ public:
 		if (GetKey(olc::K3).bPressed)
 		{
 			// Clear
-			for (int i = 0; i < vWorldMap.size(); i++)
+			for (int i = 0; i < vWorldMapGraphics.size(); i++)
 			{
-				vWorldMap[i] = 0;
+				vWorldMapGraphics[i] = 0;
 			}
 		}
 
@@ -432,13 +527,19 @@ public:
 				file.read((char*)&m_vWorldSize, sizeof(olc::vi2d));
 				file.read((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-				for (int i = 0; i < vWorldMap.size(); i++)
+				for (int i = 0; i < vWorldMapGraphics.size(); i++)
 				{
-					file.read((char*)&vWorldMap[i], sizeof(uint8_t));
+					file.read((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
 				}
 
 				file.close();
+
+				for (size_t i = 0; i < vWorldMapGraphics.size(); i++)
+				{
+					vWorldMapGraphics_undo[i] = vWorldMapGraphics[i];
+				}
 			}
+
 
 
 			
@@ -450,9 +551,9 @@ public:
 			file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
 			file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-			for (int i = 0; i < vWorldMap.size(); i++)
+			for (int i = 0; i < vWorldMapGraphics.size(); i++)
 			{
-				file.write((char*)&vWorldMap[i], sizeof(uint8_t));
+				file.write((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
 			}
 
 			file.close();
@@ -480,14 +581,16 @@ public:
 		camera.EnableWorldBoundary(true);
 
 		// Create "tile map" world with just two tiles
-		vWorldMap.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapGraphics.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapGraphics_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
 
 		// Set default
-		/*for (int i = 0; i < vWorldMap.size(); i++)
-			vWorldMap[i] = ((rand() % 20) == 1) ? 1 : 0;*/
-		for (int i = 0; i < vWorldMap.size(); i++)
+		/*for (int i = 0; i < vWorldMapGraphics.size(); i++)
+			vWorldMapGraphics[i] = ((rand() % 20) == 1) ? 1 : 0;*/
+		for (int i = 0; i < vWorldMapGraphics.size(); i++)
 		{
-			vWorldMap[i] = C64FileTileKey.Blank;
+			vWorldMapGraphics[i] = C64FileTileKey.Blank;
+			vWorldMapGraphics_undo[i] = C64FileTileKey.Blank;
 		}
 
 
