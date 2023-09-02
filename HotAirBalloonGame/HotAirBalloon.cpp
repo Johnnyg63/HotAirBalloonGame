@@ -347,13 +347,13 @@ private:
 		sprColourBalloonUp = new olc::Sprite(24, 20);
 
 		std::string sBalloonMap =
-			"........555555555......."
-			"......5889999999885....."
-			".....5899BBEEEBB9985...."
-			".....589BEE44EEEB985...."
-			"....589BEE4EE44EEB985..."
-			"....589BEE4EEEEEEB985..."
-			"....589BEE4EE55EEB985..."
+			"........666666666......."
+			"......6889999999886....."
+			".....6899BBEEEBB9986...."
+			".....689BEE44EEEB986...."
+			"....689BEE4EE44EEB986..."
+			"....689BEE4EEEEEEB986..."
+			"....689BEE4EE55EEB986..."
 			".....589BEE44EEEB985...."
 			".....589BEEEEEEEB985...."
 			".....7.589BEEEB985.7...."
@@ -645,7 +645,7 @@ public:
 	{
 		
 		// Handle player "physics" in response to key presses
-		objectPlayer.vVel = { 0.0f, 0.0f };
+		objectPlayer.vVel = { 0.0f, 0.2f };
 		objectPlayer.pDecal = decColourBalloon;
 		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld)
 		{
@@ -673,13 +673,7 @@ public:
 
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
 
-		// Some borders 
-		if (vTrackedPoint.x < 0.00f) vTrackedPoint.x = 0.00f;
-		if (vTrackedPoint.x > m_vWorldSize.x) vTrackedPoint.x = 128.0f;
-		if (vTrackedPoint.y < 0.01f) vTrackedPoint.y = 0.01f;
-		if (vTrackedPoint.y > m_vWorldSize.y) vTrackedPoint.y = 15.0f;
-
-
+		
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
 
@@ -871,6 +865,33 @@ public:
 
 
 			}
+
+
+		// Some borders 
+		if (vTrackedPoint.x < 0.00f)
+		{
+			vTrackedPoint.x = 0.00f;
+			objectPlayer.vPos.x = 0.0f;
+		}
+		if (vTrackedPoint.x > m_vWorldSize.x)
+		{
+			vTrackedPoint.x = m_vWorldSize.x;
+			objectPlayer.vPos.x = m_vWorldSize.x;
+		}
+
+		if (vTrackedPoint.y < 0.01f)
+		{
+			vTrackedPoint.y = 0.01f;
+			objectPlayer.vPos.y = 0.01f;
+		}
+
+		if (vTrackedPoint.y > m_vWorldSize.y)
+		{
+			vTrackedPoint.y = m_vWorldSize.y;
+			objectPlayer.vPos.y = m_vWorldSize.y;
+		}
+
+
 
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
