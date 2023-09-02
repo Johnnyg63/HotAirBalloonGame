@@ -147,9 +147,13 @@
     <None Include="WASM\pge2wasm.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\BitsSpriteSheet.png" />
     <Image Include="assets\C64LevelOne.png" />
     <Image Include="assets\Commodore64Banner.png" />
     <Image Include="assets\olcbanner.png" />
+    <Image Include="assets\RickEmemiesSpriteSheet.png" />
+    <Image Include="assets\RickSpriteSheet.png" />
+    <Image Include="assets\VixenSpriteSheet.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

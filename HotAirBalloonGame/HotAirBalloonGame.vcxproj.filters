@@ -66,5 +66,17 @@
     <Image Include="assets\Commodore64Banner.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\BitsSpriteSheet.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\RickEmemiesSpriteSheet.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\RickSpriteSheet.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\VixenSpriteSheet.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>
