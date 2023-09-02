@@ -63,5 +63,8 @@
     <Image Include="assets\olcbanner.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\Commodore64Banner.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>

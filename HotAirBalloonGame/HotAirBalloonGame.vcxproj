@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\C64LevelOne.png" />
+    <Image Include="assets\Commodore64Banner.png" />
     <Image Include="assets\olcbanner.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

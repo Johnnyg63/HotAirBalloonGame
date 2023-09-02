@@ -29,6 +29,7 @@ public:
 	/* Vectors */
 	std::vector<std::string> vecMessages;	// Hold messages to be displayed
 	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes; // Holds the C64 colour code by key, value
+	std::vector<std::pair<char, olc::Pixel>> vecC64PixelColourCodes; // Holds the C64 Pixel colour code by key, value
 	
 
 	/* Sprites */
@@ -145,6 +146,30 @@ private:
 		vecC64ColourCodes.push_back({ 14, C64Color.Blue });
 		vecC64ColourCodes.push_back({ 15, C64Color.Purple });
 
+		//
+		vecC64PixelColourCodes.clear();
+		vecC64PixelColourCodes.push_back({ '0', C64Color.Black });
+		vecC64PixelColourCodes.push_back({ '1', C64Color.DarkGrey });
+		vecC64PixelColourCodes.push_back({ '2', C64Color.Grey });
+		vecC64PixelColourCodes.push_back({ '3', C64Color.LightGrey });
+
+		vecC64PixelColourCodes.push_back({ '4', C64Color.White });
+		vecC64PixelColourCodes.push_back({ '5', C64Color.Red });
+		vecC64PixelColourCodes.push_back({ '6', C64Color.LightRed });
+		vecC64PixelColourCodes.push_back({ '7', C64Color.Brown });
+
+		vecC64PixelColourCodes.push_back({ '8', C64Color.Orange });
+		vecC64PixelColourCodes.push_back({ '9', C64Color.Yellow });
+		vecC64PixelColourCodes.push_back({ 'A', C64Color.LightGreen });
+		vecC64PixelColourCodes.push_back({ 'B', C64Color.Green });
+
+		vecC64PixelColourCodes.push_back({ 'C', C64Color.Cyan });
+		vecC64PixelColourCodes.push_back({ 'D', C64Color.LightBlue });
+		vecC64PixelColourCodes.push_back({ 'E', C64Color.Blue });
+		vecC64PixelColourCodes.push_back({ 'F', C64Color.Purple });
+
+		
+
 	}
 
 	void C64DisplayScreen()
@@ -235,6 +260,75 @@ private:
 			{
 				sprBalloon->pColData[i] = olc::BLANK;
 				continue;
+			}
+
+
+		}
+
+		decBalloon = new olc::Decal(sprBalloon);
+
+
+
+	}
+
+	void C64CreateColourBalloonSprite()
+	{
+		// Right we have a sprite of size 24 X 20
+
+		sprBalloon = new olc::Sprite(24, 20);
+
+		/*
+			Grey = 2
+			White = 4
+			Red = 5
+			Brown = 7
+			Org = 8
+			Yellow = 9
+			Green = B
+			Blue = E
+		*/
+
+		std::string sBalloonMap =
+			"........555555555......."
+			"......5889999999885....."
+			".....5899BBEEEBB9985...."
+			".....589BEE44EEEB985...."
+			"....589BEE4EE44EEB985..."
+			"....589BEE4EEEEEEB985..."
+			"....589BEE4EE55EEB985..."
+			".....589BEE44EEEB985...."
+			".....589BEEEEEEEB985...."
+			".....7.589BEEEB985.7...."
+			"......7..589B985..7....."
+			"......7...58985...7....."
+			".......7...585...7......"
+			".......7...585...7......"
+			"........7...9...7......."
+			"........7...8...7......."
+			".........8787878........"
+			"..........87278........."
+			"..........82528........."
+			"...........828..........";
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprBalloon->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprBalloon->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+			for (auto p : vecC64PixelColourCodes)
+			{
+				if (p.first == sBalloonMap[i])
+				{
+					sprBalloon->pColData[i] = p.second;
+				}
 			}
 
 
@@ -765,7 +859,7 @@ public:
 		// Lets build up our colour code (will make life easier later
 		C64LoadColourCodes();
 
-		C64CreateBalloonSprite();
+		C64CreateColourBalloonSprite();
 
 		// Construct transform view
 		tv = olc::TileTransformedView(GetScreenSize(), m_vTileSize);
