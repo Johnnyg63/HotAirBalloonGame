@@ -339,7 +339,7 @@ public:
 
 		/// coll
 		// Where will object be worst case?
-		olc::vf2d vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * fElapsedTime;
+		olc::vf2d vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
 
 		// Extract region of world cells that could have collision this frame
 		olc::vi2d vCurrentCell = objectPlayer.vPos.floor();
