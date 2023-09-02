@@ -608,7 +608,7 @@ private:
 		objectRick.pDecal = decRickSpriteSheet;
 		objectRick.vCenterPos = { 4.0f, 4.0f };
 		objectRick.vPos = { 3.0f, 3.0f };
-		objectRick.vPotentialPosition = objectRick.vPos;
+		objectRick.vPotentialPosition = { 0.0f, 0.0f };
 		objectRick.vSize = { 16, 16 };
 		objectRick.vSourceSize = { 32, 32 };
 
@@ -640,6 +640,7 @@ public:
 		olc::Decal* pDecal = nullptr;
 
 		bool bEnabled = false;
+		bool bVelChanged = false;
 		bool bRunningRight = false;
 		uint8_t C64FileKey;
 		int nRunCurrentFrame = 0;
@@ -701,9 +702,25 @@ public:
 
 	float testTime = 0.0f;
 
-	void DrawObject(float fElaspedTime, olc::vf2d vTile)
+	void EnableWorldObject(olc::vf2d vTile)
 	{
+		if (!objectRick.bEnabled)
+		{
+			objectRick.vPos = vTile;
+			objectRick.vPos.y += -1;
+			objectRick.vPotentialPosition = vTile;
+			objectRick.bEnabled = true;
+			objectRick.bRunningRight = true;
+		}
 		
+	}
+
+
+	void DrawWorldObjects(float fElaspedTime)
+	{
+
+		if (!objectRick.bEnabled) return;
+
 		testTime = testTime + fElaspedTime;
 
 		if (testTime > 0.200f)
@@ -715,13 +732,6 @@ public:
 
 		}
 
-		if (!objectRick.bEnabled)
-		{
-			objectRick.vPos = vTile;
-			objectRick.vPos.y += -1;
-			objectRick.bEnabled = true;
-			objectRick.bRunningRight = true;
-		}
 
 		olc::vf2d vFrame = objectRick.vSourceStand;
 
@@ -745,7 +755,7 @@ public:
 		}
 		tv.DrawPartialDecal(objectRick.vPos, objectRick.vSize, objectRick.pDecal, vFrame, objectRick.vSourceSize);
 
-		
+
 	}
 
 	void HandleGraphics(float fElapsedTime)
@@ -780,6 +790,23 @@ public:
 
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
 
+		// WorldObjects
+		if (objectRick.bEnabled)
+		{
+			objectRick.vVel = { 0.0f, 0.2f };
+			if (objectRick.bRunningRight)
+			{
+				objectRick.vVel += {+1, 0};
+			}
+			else
+			{
+				objectRick.vVel += {-1, 0};
+			};
+			objectRick.vPotentialPosition = objectRick.vPos + objectRick.vVel * 4.0f * fElapsedTime;
+			objectRick.bVelChanged = true;
+		}
+		
+
 		
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
@@ -808,7 +835,9 @@ public:
 				// Lets get our collison
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
-					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
+					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true, false);
+					HandleCollison(fElapsedTime, &vTile, &objectRick, false, false);
+
 					if (bShowGrid && bShowGridPlayer)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
@@ -825,7 +854,9 @@ public:
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
 						continue;
 					}
-					DrawObject(fElapsedTime, vTile);
+					EnableWorldObject(vTile);
+					
+					
 
 
 				}
@@ -837,7 +868,7 @@ public:
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
 						continue;
 					}
-					//HandleCollison(fElapsedTime, &vTile, &objectRick, false);
+					HandleCollison(fElapsedTime, &vTile, &objectRick, false, true);
 					
 				}
 
@@ -1018,7 +1049,8 @@ public:
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
-		//tv.DrawDecal({ 2.0f, 2.0f }, decRickSpriteSheet);
+		//Draw any WorldObjects that are enabled
+		DrawWorldObjects(fElapsedTime);
 
 
 
@@ -1029,25 +1061,13 @@ public:
 
 
 	// lets get the collision
-	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer = false)
+	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer, bool bIsBlock)
 	{
 		if (!bIsPlayer)
 		{
+			if (!worldObject->bEnabled || !worldObject->bVelChanged) return;
 			
-			if (!worldObject->bEnabled) return;
-			worldObject->vVel = { 0.0f, 0.2f };
-			if (worldObject->bRunningRight)
-			{
-				objectPlayer.vVel += {+1, 0};
-			}
-			else
-			{
-				objectPlayer.vVel += {-1, 0};
-			};
-			
-			worldObject->vPotentialPosition = worldObject->vPos + worldObject->vVel * 4.0f * fElapsedTime;
 		}
-
 		olc::vf2d vNearestPoint;
 		vNearestPoint.x = std::max(float(vTile->x), std::min(worldObject->vPotentialPosition.x, float(vTile->x + 1)));
 		vNearestPoint.y = std::max(float(vTile->y), std::min(worldObject->vPotentialPosition.y, float(vTile->y + 1)));
@@ -1063,7 +1083,8 @@ public:
 		{
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-			objectPlayer.bRunningRight = !objectPlayer.bRunningRight;
+			if(bIsBlock) worldObject->bRunningRight = !worldObject->bRunningRight;
+			
 		}
 
 		// Set the objects new position to the allowed potential position
