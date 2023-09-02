@@ -274,6 +274,7 @@ public:
 		olc::vf2d vPos;
 		olc::vf2d vVel;
 		olc::vf2d vCenterPos;
+		olc::vf2d vPotentialPosition;
 		float fRadius = 1.0f;
 		olc::Decal* decObject = nullptr;
 
@@ -303,13 +304,19 @@ public:
 
 
 	// The world map, stored as a 1D array of graphics
-	std::vector<uint8_t> vWorldMapGraphics;
-	std::vector<uint8_t> vWorldMapGraphics_undo;
+	std::vector<uint8_t> vWorldMapPlayerGraphics;
+	std::vector<uint8_t> vWorldMapPlayerGraphics_undo;
 
 
 	// The world map, stored as a 1D array for collison
-	std::vector<uint8_t> vWorldMap;
-	std::vector<uint8_t> vWorldMap_undo;
+	std::vector<uint8_t> vWorldMapPlayer;
+	std::vector<uint8_t> vWorldMapPlayer_undo;
+
+	std::vector<uint8_t> vWorldMapHero;
+	std::vector<uint8_t> vWorldMapHero_undo;
+
+	std::vector<uint8_t> vWorldMapEmemies;
+	std::vector<uint8_t> vWorldMapEmemies_undo;
 
 
 
@@ -340,7 +347,7 @@ public:
 
 		/// coll
 		// Where will object be worst case?
-		olc::vf2d vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
+		objectPlayer.vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
 		olc::vf2d vRayToNearest;
 
 		// Render "tile map", by getting visible tiles
@@ -357,70 +364,40 @@ public:
 				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
 				
 				// Lets get our collison
-				if (vWorldMap[idx] == C64FileTileKey.SetBlockPlayer)
+				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
-					if (bShowGrid && bShowGridPlayer) {
+					HandleCollison(&vTile, &objectPlayer, true);
+					if (bShowGrid && bShowGridPlayer)
+					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
-						//continue;
+						continue;
+
 					}
-
-					// ...it is! So work out nearest point to future player position, around perimeter
-					// of cell rectangle. We can test the distance to this point to see if we have
-					// collided. 
-
-					olc::vf2d vNearestPoint;
-					vNearestPoint.x = std::max(float(vTile.x), std::min(vPotentialPosition.x, float(vTile.x + 1)));
-					vNearestPoint.y = std::max(float(vTile.y), std::min(vPotentialPosition.y, float(vTile.y + 1)));
-
-					olc::vf2d vRayToNearest = vNearestPoint - vPotentialPosition;
-					float fOverlap = objectPlayer.fRadius - vRayToNearest.mag();
-					if (std::isnan(fOverlap)) fOverlap = 0;
-
-					// If overlap is positive, then a collision has occurred, so we displace backwards by the 
-					// overlap amount. The potential position is then tested against other tiles in the area
-					// therefore "statically" resolving the collision
-					if (fOverlap > 0)
-					{
-						// Statically resolve the collision
-						vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;
-					}
-
-					// Set the objects new position to the allowed potential position
-					objectPlayer.vPos = vPotentialPosition;
-					vTrackedPoint = vPotentialPosition;
-					// Draw Boundary
-					//tv.FillRectDecal(objectPlayer.vPos, {objectPlayer.fRadius, objectPlayer.fRadius}, olc::WHITE);
 					
-
-					// Draw Velocity
-					if (objectPlayer.vVel.mag2() > 0)
-					{
-						tv.DrawLineDecal(objectPlayer.vPos, objectPlayer.vPos + objectPlayer.vVel.norm() * objectPlayer.fRadius, olc::MAGENTA);
-					}
-
 				}
 
-				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
+				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
 					if (bShowGrid && bShowGridHero)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
 						continue;
 					}
+					
 				}
 
-				if (vWorldMap[idx] == C64FileTileKey.SetBlockHero)
+				if (vWorldMapEmemies[idx] == C64FileTileKey.SetBlockEmemies)
 				{
 					if (bShowGrid && bShowGridEmemies)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
 						continue;
 					}
-					
+
 				}
 
 				// TODO: Needs refactoring... no time in Jam time
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Blank)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blank)
 				{
 					if (bShowGrid)
 					{
@@ -430,7 +407,7 @@ public:
 					
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.GetSprite)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.GetSprite)
 				{
 					if (vTile.y > 8)
 					{
@@ -450,102 +427,102 @@ public:
 				
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Black)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Black)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Black);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Blue)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blue)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Brown)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Brown)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Brown);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Cyan)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Cyan)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Cyan);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.DarkGrey)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.DarkGrey)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.DarkGrey);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Green)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Green)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Grey)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Grey)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.LightBlue)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightBlue)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightBlue);
 					continue;
 				}
 			
-				if (vWorldMapGraphics[idx] == C64FileTileKey.LightGreen)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGreen)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGreen);
 					continue;
 				}
 
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.LightGrey)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGrey)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGrey);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.LightRed)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightRed)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightRed);
 					continue;
 				}
 
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Orange)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Orange)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Orange);
 					continue;
 				}
 
 				
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Purple)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Purple)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Purple);
 					continue;
 				}
 
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Red)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Red)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Red);
 					continue;
 				}
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.White)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.White)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.White);
 					continue;
 				}
 
 
-				if (vWorldMapGraphics[idx] == C64FileTileKey.Yellow)
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Yellow)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Yellow);
 					continue;
@@ -564,12 +541,35 @@ public:
 
 
 	// lets get the collision
-	void HandleCollison(float fElapsedTime, olc::vi2d vTile)
+	void HandleCollison(olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer = false)
 	{
+		olc::vf2d vNearestPoint;
+		vNearestPoint.x = std::max(float(vTile->x), std::min(worldObject->vPotentialPosition.x, float(vTile->x + 1)));
+		vNearestPoint.y = std::max(float(vTile->y), std::min(worldObject->vPotentialPosition.y, float(vTile->y + 1)));
 
+		olc::vf2d vRayToNearest = vNearestPoint - worldObject->vPotentialPosition;
+		float fOverlap = worldObject->fRadius - vRayToNearest.mag();
+		if (std::isnan(fOverlap)) fOverlap = 0;
+
+		// If overlap is positive, then a collision has occurred, so we displace backwards by the 
+		// overlap amount. The potential position is then tested against other tiles in the area
+		// therefore "statically" resolving the collision
+		if (fOverlap > 0)
+		{
+			// Statically resolve the collision
+			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
+		}
+
+		// Set the objects new position to the allowed potential position
+		worldObject->vPos = worldObject->vPotentialPosition;
+		if(bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
+		
+		// Draw Velocity
+		if (worldObject->vVel.mag2() > 0)
+		{
+			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
+		}
 	}
-
-
 
 	// Handle input for graphics 
 	void HandleInput(float fElapsedTime, olc::vi2d vTile)
@@ -580,10 +580,10 @@ public:
 			tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			//vWorldMapGraphics[idx] = C64FileTileKey.Black;
-			if (bShowGridPlayer) vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
-			if (bShowGridHero) vWorldMap[idx] = C64FileTileKey.SetBlockHero;
-			if (bShowGridEmemies) vWorldMap[idx] = C64FileTileKey.SetBlockEmemies;
+			//vWorldMapPlayerGraphics[idx] = C64FileTileKey.Black;
+			if (bShowGridPlayer) vWorldMapPlayer[idx] = C64FileTileKey.SetBlockPlayer;
+			if (bShowGridHero) vWorldMapHero[idx] = C64FileTileKey.SetBlockHero;
+			if (bShowGridEmemies) vWorldMapEmemies[idx] = C64FileTileKey.SetBlockEmemies;
 
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
@@ -591,8 +591,11 @@ public:
 			// Undo Button
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			//vWorldMapGraphics[idx] = vWorldMapGraphics_undo[idx];
-			vWorldMap[idx] = vWorldMap_undo[idx];
+			//vWorldMapPlayerGraphics[idx] = vWorldMapPlayerGraphics_undo[idx];
+			if (bShowGridPlayer) vWorldMapPlayer[idx] = vWorldMapPlayer_undo[idx];
+			if (bShowGridHero) vWorldMapHero[idx] = vWorldMapHero_undo[idx];
+			if (bShowGridEmemies) vWorldMapEmemies[idx] = vWorldMapEmemies_undo[idx];
+			
 		}
 
 
@@ -612,10 +615,10 @@ public:
 		if (GetKey(olc::C).bPressed)
 		{
 			// Clear
-			for (int i = 0; i < vWorldMapGraphics.size(); i++)
+			for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 			{
-				vWorldMapGraphics[i] = C64FileTileKey.Blank;
-				vWorldMap[i] = C64FileTileKey.Blank;
+				vWorldMapPlayerGraphics[i] = C64FileTileKey.Blank;
+				vWorldMapPlayer[i] = C64FileTileKey.Blank;
 			}
 		}
 
@@ -667,24 +670,48 @@ public:
 				file.read((char*)&m_vWorldSize, sizeof(olc::vi2d));
 				file.read((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-				for (int i = 0; i < vWorldMapGraphics.size(); i++)
+				// Graphics World
+				for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 				{
-					file.read((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
+					file.read((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
 				}
 
-				for (int i = 0; i < vWorldMap.size(); i++)
+				for (size_t i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 				{
-					file.read((char*)&vWorldMap[i], sizeof(uint8_t));
+					vWorldMapPlayerGraphics_undo[i] = vWorldMapPlayerGraphics[i];
 				}
 
-				for (size_t i = 0; i < vWorldMapGraphics.size(); i++)
+				// Player World
+				for (int i = 0; i < vWorldMapPlayer.size(); i++)
 				{
-					vWorldMapGraphics_undo[i] = vWorldMapGraphics[i];
+					file.read((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
 				}
 
-				for (size_t i = 0; i < vWorldMap.size(); i++)
+				for (size_t i = 0; i < vWorldMapPlayer.size(); i++)
 				{
-					vWorldMap_undo[i] = vWorldMap[i];
+					vWorldMapPlayer_undo[i] = vWorldMapPlayer[i];
+				}
+
+				// Hero World
+				for (int i = 0; i < vWorldMapHero.size(); i++)
+				{
+					file.read((char*)&vWorldMapHero[i], sizeof(uint8_t));
+				}
+
+				for (size_t i = 0; i < vWorldMapHero.size(); i++)
+				{
+					vWorldMapHero_undo[i] = vWorldMapHero[i];
+				}
+
+				// Ememies World
+				for (int i = 0; i < vWorldMapEmemies.size(); i++)
+				{
+					file.read((char*)&vWorldMapEmemies[i], sizeof(uint8_t));
+				}
+
+				for (size_t i = 0; i < vWorldMapEmemies.size(); i++)
+				{
+					vWorldMapEmemies_undo[i] = vWorldMapEmemies[i];
 				}
 
 				file.close();
@@ -703,14 +730,29 @@ public:
 			file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
 			file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-			for (size_t i = 0; i < vWorldMapGraphics.size(); i++)
+			// Graphic world
+			for (size_t i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 			{
-				file.write((char*)&vWorldMapGraphics[i], sizeof(uint8_t));
+				file.write((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
 			}
 
-			for (size_t i = 0; i < vWorldMap.size(); i++)
+			// Player world
+			for (size_t i = 0; i < vWorldMapPlayer.size(); i++)
 			{
-				file.write((char*)&vWorldMap[i], sizeof(uint8_t));
+				file.write((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
+			}
+
+			// Hero world
+			for (size_t i = 0; i < vWorldMapHero.size(); i++)
+			{
+				file.write((char*)&vWorldMapHero[i], sizeof(uint8_t));
+			}
+
+
+			// Ememies World
+			for (size_t i = 0; i < vWorldMapEmemies.size(); i++)
+			{
+				file.write((char*)&vWorldMapEmemies[i], sizeof(uint8_t));
 			}
 
 
@@ -739,21 +781,29 @@ public:
 		camera.EnableWorldBoundary(true);
 
 		// Create "tile map" world with just two tiles
-		vWorldMapGraphics.resize(m_vWorldSize.x * m_vWorldSize.y);
-		vWorldMapGraphics_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
-		vWorldMap.resize(m_vWorldSize.x * m_vWorldSize.y);
-		vWorldMap_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapPlayerGraphics.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapPlayerGraphics_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapPlayer.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapPlayer_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapHero.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapHero_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapEmemies.resize(m_vWorldSize.x * m_vWorldSize.y);
+		vWorldMapEmemies_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
 
 
 		// Set default
-		/*for (int i = 0; i < vWorldMapGraphics.size(); i++)
-			vWorldMapGraphics[i] = ((rand() % 20) == 1) ? 1 : 0;*/
-		for (int i = 0; i < vWorldMapGraphics.size(); i++)
+		/*for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
+			vWorldMapPlayerGraphics[i] = ((rand() % 20) == 1) ? 1 : 0;*/
+		for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 		{
-			vWorldMap[i] = C64FileTileKey.Blank;
-			vWorldMap_undo[i] = C64FileTileKey.Blank;
-			vWorldMapGraphics[i] = C64FileTileKey.Blank;
-			vWorldMapGraphics_undo[i] = C64FileTileKey.Blank;
+			vWorldMapPlayerGraphics[i] = C64FileTileKey.Blank;
+			vWorldMapPlayerGraphics_undo[i] = C64FileTileKey.Blank;
+			vWorldMapPlayer[i] = C64FileTileKey.Blank;
+			vWorldMapPlayer_undo[i] = C64FileTileKey.Blank;
+			vWorldMapHero[i] = C64FileTileKey.Blank;
+			vWorldMapHero_undo[i] = C64FileTileKey.Blank;
+			vWorldMapEmemies[i] = C64FileTileKey.Blank;
+			vWorldMapEmemies_undo[i] = C64FileTileKey.Blank;
 		}
 
 
