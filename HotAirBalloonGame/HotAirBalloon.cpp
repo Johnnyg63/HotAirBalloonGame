@@ -340,16 +340,7 @@ public:
 		/// coll
 		// Where will object be worst case?
 		olc::vf2d vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
-
-		// Extract region of world cells that could have collision this frame
-		olc::vi2d vCurrentCell = objectPlayer.vPos.floor();
-		olc::vi2d vTargetCell = vPotentialPosition;
-		olc::vi2d vAreaTL = (vCurrentCell.min(vTargetCell) - olc::vi2d(1, 1)).max({ 0,0 });
-		olc::vi2d vAreaBR = (vCurrentCell.max(vTargetCell) + olc::vi2d(1, 1)).min(m_vWorldSize);
-
 		olc::vf2d vRayToNearest;
-
-
 
 		// Render "tile map", by getting visible tiles
 		olc::vi2d vTileTL = tv.GetTopLeftTile().max({ 0,0 });
@@ -458,7 +449,6 @@ public:
 				
 				}
 
-
 				if (vWorldMapGraphics[idx] == C64FileTileKey.Black)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Black);
@@ -489,7 +479,6 @@ public:
 					continue;
 				}
 
-
 				if (vWorldMapGraphics[idx] == C64FileTileKey.Green)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
@@ -502,14 +491,12 @@ public:
 					continue;
 				}
 
-
 				if (vWorldMapGraphics[idx] == C64FileTileKey.LightBlue)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightBlue);
 					continue;
 				}
-
-				
+			
 				if (vWorldMapGraphics[idx] == C64FileTileKey.LightGreen)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGreen);
@@ -569,10 +556,23 @@ public:
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(0.5f, 0.5f), decBalloon);
 
-		/*DrawStringPropDecal({ 2,12 }, "WASD  : Move", olc::YELLOW);
+		HandleInput(fElapsedTime, vTile);
+		
 
-		DrawStringPropDecal({ 2,42 }, vTrackedPoint.str(), olc::YELLOW);*/
+	}
 
+
+	// lets get the collision
+	void HandleCollison(float fElapsedTime, olc::vi2d vTile)
+	{
+
+	}
+
+
+
+	// Handle input for graphics 
+	void HandleInput(float fElapsedTime, olc::vi2d vTile)
+	{
 		if (GetMouse(0).bHeld || GetMouse(0).bPressed)
 		{
 			olc::vi2d vTilePos = tv.GetTileUnderScreenPos(GetMousePos());
@@ -580,10 +580,10 @@ public:
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
 			//vWorldMapGraphics[idx] = C64FileTileKey.Black;
-			if(bShowGridPlayer) vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
+			if (bShowGridPlayer) vWorldMap[idx] = C64FileTileKey.SetBlockPlayer;
 			if (bShowGridHero) vWorldMap[idx] = C64FileTileKey.SetBlockHero;
 			if (bShowGridEmemies) vWorldMap[idx] = C64FileTileKey.SetBlockEmemies;
-			
+
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
@@ -598,7 +598,7 @@ public:
 		if (GetKey(olc::L).bPressed)
 		{
 			// load a file
-			
+
 			LoadMap("./assets/levelone.bin");
 		}
 
@@ -634,42 +634,24 @@ public:
 			bShowGridEmemies = false;
 		}
 
-
 		if (GetKey(olc::K2).bPressed)
 		{
 			bShowGridPlayer = false;
 			bShowGridHero = true;
 			bShowGridEmemies = false;
 		}
-			
-		if (GetKey(olc::K3).bPressed) 
+
+		if (GetKey(olc::K3).bPressed)
 		{
 			bShowGridPlayer = false;
 			bShowGridHero = false;
 			bShowGridEmemies = true;
 		}
 
-		
-
 	}
 
-	// lets get the collision
-	void TestCode2(float fElapsedTime)
-	{
-		// Control of Player Object
-		objectPlayer.vVel = { 0.0f, 0.0f };
-		if (GetKey(olc::Key::W).bHeld) objectPlayer.vVel += { 0.0f, -1.0f };
-		if (GetKey(olc::Key::S).bHeld) objectPlayer.vVel += { 0.0f, +1.0f };
-		if (GetKey(olc::Key::A).bHeld) objectPlayer.vVel += { -1.0f, 0.0f };
-		if (GetKey(olc::Key::D).bHeld) objectPlayer.vVel += { +1.0f, 0.0f };
-
-		if (objectPlayer.vVel.mag2() > 0)
-			objectPlayer.vVel = objectPlayer.vVel.norm() * (GetKey(olc::Key::SHIFT).bHeld ? 5.0f : 2.0f);
-
-		if (GetKey(olc::Key::SPACE).bReleased) bFollowObject = !bFollowObject;
 
 
-	}
 
 
 	// Game Save
