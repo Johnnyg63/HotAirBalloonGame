@@ -273,7 +273,8 @@ public:
 	{
 		olc::vf2d vPos;
 		olc::vf2d vVel;
-		float fRadius = 2.0f;
+		olc::vf2d vCenterPos;
+		float fRadius = 1.0f;
 		olc::Decal* decObject = nullptr;
 
 	};
@@ -554,7 +555,7 @@ public:
 			}
 
 		// Draw our balloon
-		tv.DrawDecal(vTrackedPoint - olc::vf2d(0.5f, 0.5f), decBalloon);
+		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), decBalloon);
 
 		HandleInput(fElapsedTime, vTile);
 		
@@ -760,6 +761,7 @@ public:
 		LoadLevel(1);
 
 		objectPlayer.vPos = { 3.0f, 3.0f };
+		objectPlayer.vCenterPos = { 4.0f, 4.0f };
 		objectPlayer.decObject = new olc::Decal(sprBalloon);
 
 		// Set background colour
