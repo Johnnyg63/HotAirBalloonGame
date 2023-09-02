@@ -309,9 +309,9 @@ private:
 			"........7...9...7......."
 			"........7...8...7......."
 			".........8787878........"
-			"..........87278........."
+			"..........87878........."
 			"..........82528........."
-			"...........828..........";
+			"...........878..........";
 
 		olc::vi2d vBallonSize = { 24, 20 };
 
@@ -362,10 +362,10 @@ private:
 			".......7...959...7......"
 			"........7...5...7......."
 			"........7...8...7......."
-			".........8727278........"
-			"..........87278........."
-			"..........82528........."
-			"...........828..........";
+			".........8787878........"
+			"..........87878........."
+			"..........82628........."
+			"...........878..........";
 
 		olc::vi2d vBallonSize = { 24, 20 };
 
@@ -419,9 +419,9 @@ private:
 			"........7...9...7......."
 			"........7...8...7......."
 			".........8787878........"
-			"..........87278........."
+			"..........87878........."
 			"..........82528........."
-			"...........828..........";
+			"...........878..........";
 
 		olc::vi2d vBallonSize = { 24, 20 };
 
@@ -662,13 +662,13 @@ public:
 		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld)
 		{
 			objectPlayer.vVel += {-1, 0}; // left
-			objectPlayer.pDecal = decColourBalloonLeft;
+			//objectPlayer.pDecal = decColourBalloonLeft; // turned off looks crap, but you get the idea of how it was done ya?
 		}
 
 		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld)
 		{
 			objectPlayer.vVel += {+1, 0}; // right
-			objectPlayer.pDecal = decColourBalloonRight;
+			///objectPlayer.pDecal = decColourBalloonRight; // turned off looks crap
 		}
 
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
