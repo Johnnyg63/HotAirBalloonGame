@@ -36,6 +36,22 @@ public:
 	olc::Sprite* sprBalloon;
 	olc::Decal* decBalloon;
 
+	olc::Sprite* sprColourBalloon;
+	olc::Decal* decColourBalloon;
+
+	olc::Sprite* sprColourBalloonUp;
+	olc::Decal* decColourBalloonUp;
+
+	olc::Sprite* sprColourBalloonDown;
+	olc::Decal* decColourBalloonDown;
+
+
+	olc::Sprite* sprColourBalloonRight;
+	olc::Decal* decColourBalloonRight;
+	
+	olc::Sprite* sprColourBalloonLeft;
+	olc::Decal* decColourBalloonLeft;
+
 	olc::Sprite* sprC64Level;
 	olc::Decal* decC64Level;
 
@@ -220,8 +236,6 @@ private:
 		// Right we have a sprite of size 24 X 20
 
 		sprBalloon = new olc::Sprite(24, 20);
-
-
 		std::string sBalloonMap =
 			".........#######........"
 			".......###########......"
@@ -275,18 +289,7 @@ private:
 	{
 		// Right we have a sprite of size 24 X 20
 
-		sprBalloon = new olc::Sprite(24, 20);
-
-		/*
-			Grey = 2
-			White = 4
-			Red = 5
-			Brown = 7
-			Org = 8
-			Yellow = 9
-			Green = B
-			Blue = E
-		*/
+		sprColourBalloon = new olc::Sprite(24, 20);
 
 		std::string sBalloonMap =
 			"........555555555......."
@@ -312,14 +315,14 @@ private:
 
 		olc::vi2d vBallonSize = { 24, 20 };
 
-		size_t vecLength = sprBalloon->pColData.size();
+		size_t vecLength = sprColourBalloon->pColData.size();
 
 		for (size_t i = 0; i < vecLength; i++)
 		{
 
 			if (sBalloonMap[i] == '.')
 			{
-				sprBalloon->pColData[i] = olc::BLANK;
+				sprColourBalloon->pColData[i] = olc::BLANK;
 				continue;
 			}
 
@@ -327,14 +330,237 @@ private:
 			{
 				if (p.first == sBalloonMap[i])
 				{
-					sprBalloon->pColData[i] = p.second;
+					sprColourBalloon->pColData[i] = p.second;
+				}
+			}
+		}
+
+		decColourBalloon = new olc::Decal(sprColourBalloon);
+
+
+
+	}
+
+	void C64CreateColourBalloonSpriteUP()
+	{
+		
+		sprColourBalloonUp = new olc::Sprite(24, 20);
+
+		std::string sBalloonMap =
+			"........555555555......."
+			"......5889999999885....."
+			".....5899BBEEEBB9985...."
+			".....589BEE44EEEB985...."
+			"....589BEE4EE44EEB985..."
+			"....589BEE4EEEEEEB985..."
+			"....589BEE4EE55EEB985..."
+			".....589BEE44EEEB985...."
+			".....589BEEEEEEEB985...."
+			".....7.589BEEEB985.7...."
+			"......7..589B985..7....."			"......7...59595...7....."
+			".......7...959...7......"
+			".......7...959...7......"
+			"........7...5...7......."
+			"........7...8...7......."
+			".........8727278........"
+			"..........87278........."
+			"..........82528........."
+			"...........828..........";
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprColourBalloonUp->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprColourBalloonUp->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+			for (auto p : vecC64PixelColourCodes)
+			{
+				if (p.first == sBalloonMap[i])
+				{
+					sprColourBalloonUp->pColData[i] = p.second;
 				}
 			}
 
 
 		}
 
-		decBalloon = new olc::Decal(sprBalloon);
+		decColourBalloonUp = new olc::Decal(sprColourBalloonUp);
+
+
+
+	}
+
+	void C64CreateColourBalloonSpriteDown()
+	{
+		sprColourBalloonDown = new olc::Sprite(24, 20);
+
+		std::string sBalloonMap =
+			".....555..CC.CC..555...."
+			"......5889.CCC.9885....."
+			".....5899BBECEBB9985...."
+			".....589BEE44EEEB985...."
+			"....589BEE4EE44EEB985..."
+			"....589BEE4EEEEEEB985..."
+			"....589BEE4EE55EEB985..."
+			".....589BEE44EEEB985...."
+			".....589BEEEEEEEB985...."
+			".....7.589BEEEB985.7...."
+			"......7..589B985..7....."
+			"......7...58985...7....."
+			".......7...585...7......"
+			".......7...585...7......"
+			"........7...9...7......."
+			"........7...8...7......."
+			".........8787878........"
+			"..........87278........."
+			"..........82528........."
+			"...........828..........";
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprColourBalloonDown->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprColourBalloonDown->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+			for (auto p : vecC64PixelColourCodes)
+			{
+				if (p.first == sBalloonMap[i])
+				{
+					sprColourBalloonDown->pColData[i] = p.second;
+				}
+			}
+
+		}
+
+		decColourBalloonDown = new olc::Decal(sprColourBalloonDown);
+
+
+
+	}
+
+	void C64CreateColourBalloonSpriteRight()
+	{
+		// Right we have a sprite of size 24 X 20
+
+		sprColourBalloonRight = new olc::Sprite(24, 20);
+
+		std::string sBalloonMap =
+			".........555555555......"
+			".......5889999999885...."
+			"......5899BBEEEBB9985..."
+			"......589BEE44EEEB985..."
+			".....589BEE4EE44EEB985.."
+			".....589BEE4EEEEEEB985.."
+			".....589BEE4EE55EEB985.."
+			"......589BEE44EEEB985..."
+			"......589BEEEEEEEB985..."
+			"......7.589BEEEB985.7..."
+			".....7..589B985..7......"
+			".....7...58985...7......"
+			"......7...585...7......."
+			"......7...585...7......."
+			".......7...9...7........"
+			".......7...8...7........"
+			"........8787878........."
+			".........87278.........."
+			".........82528.........."
+			"..........828...........";
+
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprColourBalloonRight->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprColourBalloonRight->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+			for (auto p : vecC64PixelColourCodes)
+			{
+				if (p.first == sBalloonMap[i])
+				{
+					sprColourBalloonRight->pColData[i] = p.second;
+				}
+			}
+		}
+
+		decColourBalloonRight = new olc::Decal(sprColourBalloonRight);
+
+
+
+	}
+
+	void C64CreateColourBalloonSpriteLeft()
+	{
+		// Right we have a sprite of size 24 X 20
+
+		sprColourBalloonLeft = new olc::Sprite(24, 20);
+
+		std::string sBalloonMap =
+			".......555555555........"
+			".....5889999999885......"
+			"....5899BBEEEBB9985....."
+			"....589BEE44EEEB985....."
+			"...589BEE4EE44EEB985...."
+			"...589BEE4EEEEEEB985...."
+			"...589BEE4EE55EEB985...."
+			"....589BEE44EEEB985....."
+			"....589BEEEEEEEB985....."
+			".....7.589BEEEB985.7...."
+			"........7..589B985..7..."
+			"........7...58985...7..."
+			"........7...585...7....."
+			"........7...585...7....."
+			".........7...9...7......"
+			".........7...8...7......"
+			"..........8787878......."
+			"...........87278........"
+			"...........82528........"
+			"............828.........";
+
+
+		olc::vi2d vBallonSize = { 24, 20 };
+
+		size_t vecLength = sprColourBalloonLeft->pColData.size();
+
+		for (size_t i = 0; i < vecLength; i++)
+		{
+
+			if (sBalloonMap[i] == '.')
+			{
+				sprColourBalloonLeft->pColData[i] = olc::BLANK;
+				continue;
+			}
+
+			for (auto p : vecC64PixelColourCodes)
+			{
+				if (p.first == sBalloonMap[i])
+				{
+					sprColourBalloonLeft->pColData[i] = p.second;
+				}
+			}
+		}
+
+		decColourBalloonLeft = new olc::Decal(sprColourBalloonLeft);
 
 
 
@@ -370,7 +596,7 @@ public:
 		olc::vf2d vCenterPos;
 		olc::vf2d vPotentialPosition;
 		float fRadius = 1.0f;
-		olc::Decal* decObject = nullptr;
+		olc::Decal* pDecal = nullptr;
 
 	};
 
@@ -420,10 +646,31 @@ public:
 		
 		// Handle player "physics" in response to key presses
 		objectPlayer.vVel = { 0.0f, 0.0f };
-		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld) objectPlayer.vVel += {0, -1}; // up
-		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld) objectPlayer.vVel += {0, +1}; // down
-		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld) objectPlayer.vVel += {-1, 0}; // left
-		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld) objectPlayer.vVel += {+1, 0}; // right
+		objectPlayer.pDecal = decColourBalloon;
+		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld)
+		{
+			objectPlayer.vVel += {0, -1}; // up
+			objectPlayer.pDecal = decColourBalloonUp;
+		}
+
+		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld)
+		{
+			objectPlayer.vVel += {0, +1}; // down
+			objectPlayer.pDecal = decColourBalloonDown;
+		}
+			
+		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld)
+		{
+			objectPlayer.vVel += {-1, 0}; // left
+			objectPlayer.pDecal = decColourBalloonLeft;
+		}
+
+		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld)
+		{
+			objectPlayer.vVel += {+1, 0}; // right
+			objectPlayer.pDecal = decColourBalloonRight;
+		}
+
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
 
 		// Some borders 
@@ -626,7 +873,7 @@ public:
 			}
 
 		// Draw our balloon
-		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), decBalloon);
+		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
 		HandleInput(fElapsedTime, vTile);
 		
@@ -858,8 +1105,13 @@ public:
 	{
 		// Lets build up our colour code (will make life easier later
 		C64LoadColourCodes();
-
+		C64CreateBalloonSprite();
 		C64CreateColourBalloonSprite();
+		C64CreateColourBalloonSpriteUP();
+		C64CreateColourBalloonSpriteDown();
+		C64CreateColourBalloonSpriteLeft();
+		C64CreateColourBalloonSpriteRight();
+
 
 		// Construct transform view
 		tv = olc::TileTransformedView(GetScreenSize(), m_vTileSize);
@@ -906,7 +1158,7 @@ public:
 
 		objectPlayer.vPos = { 3.0f, 3.0f };
 		objectPlayer.vCenterPos = { 4.0f, 4.0f };
-		objectPlayer.decObject = new olc::Decal(sprBalloon);
+		objectPlayer.pDecal = decColourBalloon;
 
 		// Set background colour
 		Clear(C64Color.Blue);
