@@ -609,7 +609,7 @@ private:
 		objectRick.vCenterPos = { 4.0f, 4.0f };
 		objectRick.vPos = { 3.0f, 3.0f };
 		objectRick.vPotentialPosition = { 0.0f, 0.0f };
-		objectRick.vSize = { 16, 16 };
+		objectRick.vSize = { 24, 24 };
 		objectRick.vSourceSize = { 32, 32 };
 
 		objectRick.vSourceStand = { 64, 48 };
@@ -636,7 +636,7 @@ public:
 		olc::vf2d vVel;
 		olc::vf2d vCenterPos;
 		olc::vf2d vPotentialPosition;
-		float fRadius = 1.0f;
+		float fRadius = 1.25f;
 		olc::Decal* pDecal = nullptr;
 
 		bool bEnabled = false;
@@ -707,7 +707,7 @@ public:
 		if (!objectRick.bEnabled)
 		{
 			objectRick.vPos = vTile;
-			objectRick.vPos.y += -1;
+			objectRick.vPos.y += - 0.5f;
 			objectRick.vPotentialPosition = vTile;
 			objectRick.bEnabled = true;
 			objectRick.bRunningRight = true;
@@ -753,7 +753,16 @@ public:
 			vFrame = objectRick.vSourceStand;
 			break;
 		}
-		tv.DrawPartialDecal(objectRick.vPos, objectRick.vSize, objectRick.pDecal, vFrame, objectRick.vSourceSize);
+
+		if (objectRick.bRunningRight)
+		{
+			tv.DrawPartialDecal(objectRick.vPos - olc::vf2d(1.0f, 0.4f), objectRick.vSize, objectRick.pDecal, vFrame, objectRick.vSourceSize);
+		}
+		else
+		{
+			tv.DrawPartialDecal(objectRick.vPos - olc::vf2d(-1.0f, 0.4f), objectRick.vSize * olc::vf2d(-1.0f, 1.0f), objectRick.pDecal, vFrame, objectRick.vSourceSize);
+		}
+		
 
 
 	}
@@ -793,14 +802,14 @@ public:
 		// WorldObjects
 		if (objectRick.bEnabled)
 		{
-			objectRick.vVel = { 0.0f, 0.2f };
+			objectRick.vVel = { 0.0f, 0.0f };
 			if (objectRick.bRunningRight)
 			{
-				objectRick.vVel += {+1, 0};
+				objectRick.vVel += {+0.3f, 00.0f};
 			}
 			else
 			{
-				objectRick.vVel += {-1, 0};
+				objectRick.vVel += {-0.3f, 0};
 			};
 			objectRick.vPotentialPosition = objectRick.vPos + objectRick.vVel * 4.0f * fElapsedTime;
 			objectRick.bVelChanged = true;
@@ -835,9 +844,8 @@ public:
 				// Lets get our collison
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
-					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true, false);
-					HandleCollison(fElapsedTime, &vTile, &objectRick, false, false);
-
+					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
+					
 					if (bShowGrid && bShowGridPlayer)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
@@ -849,12 +857,13 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
 				{
+					EnableWorldObject(vTile);
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
 						continue;
 					}
-					EnableWorldObject(vTile);
+					
 					
 					
 
@@ -863,12 +872,14 @@ public:
 
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
+					HandleCollison(fElapsedTime, &vTile, &objectRick, false);
+
 					if (bShowGrid && bShowGridHero)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
 						continue;
 					}
-					HandleCollison(fElapsedTime, &vTile, &objectRick, false, true);
+
 					
 				}
 
@@ -1061,7 +1072,7 @@ public:
 
 
 	// lets get the collision
-	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer, bool bIsBlock)
+	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer)
 	{
 		if (!bIsPlayer)
 		{
@@ -1083,7 +1094,11 @@ public:
 		{
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-			if(bIsBlock) worldObject->bRunningRight = !worldObject->bRunningRight;
+			if (!bIsPlayer)
+			{
+				worldObject->bRunningRight = !worldObject->bRunningRight;
+				
+			}
 			
 		}
 
