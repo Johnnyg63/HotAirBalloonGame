@@ -58,6 +58,15 @@ public:
 	olc::Sprite* sprRickSpriteSheet;
 	olc::Decal* decRickSpriteSheet;
 
+	olc::Sprite* sprC64Banner;
+	olc::Decal* decC64Banner;
+
+	olc::Sprite* sprMSBanner;
+	olc::Decal* decMSBanner;
+
+	olc::Sprite* sprC64Logo;
+	olc::Decal* decC64Logo;
+
 
 
 	/* C64 Colour Code Pixels */
@@ -102,6 +111,7 @@ public:
 		uint8_t SetHero1 = -130;	// Set position for heros		
 		uint8_t SetHero2 = -140;	// Set position for heros
 		uint8_t SetHero3 = -150;	// Set position for heros
+		uint8_t SetHero4 = -155;	// Set position for heros
 
 		uint8_t SetEmemies1 = -160;	// Set position for ememies
 		uint8_t SetEmemies2 = -170; // Set position for ememies
@@ -592,6 +602,15 @@ private:
 		sprC64Level = new olc::Sprite("./assets/C64LevelOne.png");
 		decC64Level = new olc::Decal(sprC64Level);
 
+		sprC64Banner = new olc::Sprite("./assets/Commodore64Banner.png");
+		decC64Banner = new olc::Decal(sprC64Banner);
+
+		sprMSBanner = new olc::Sprite("./assets/Microsoft1983Banner.png");
+		decMSBanner = new olc::Decal(sprMSBanner);
+
+		sprC64Logo = new olc::Sprite("./assets/CommodoreLogo.png");
+		decC64Logo = new olc::Decal(sprC64Logo);
+
 		LoadMap("./assets/Levelone.bin");
 
 	}
@@ -602,6 +621,12 @@ private:
 		sprRickSpriteSheet = new olc::Sprite("./assets/RickSpriteSheet.png");
 		decRickSpriteSheet = new olc::Decal(sprRickSpriteSheet);
 
+	}
+
+	void CreateWorldObjects()
+	{
+		// Rick
+		objectRick.fID = 1.0f;
 		objectRick.fRadius = 1.0f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
@@ -611,16 +636,64 @@ private:
 		objectRick.vPotentialPosition = { 0.0f, 0.0f };
 		objectRick.vSize = { 24, 24 };
 		objectRick.vSourceSize = { 32, 32 };
-
 		objectRick.vSourceStand = { 64, 48 };
-		objectRick.vSourceRun1 = { 96, 48 };
-		objectRick.vSourceRun2 = { 128, 48 };
-		objectRick.vSourceRun3 = { 160, 48 };
+
+		objectRick.vecRunFrame.clear();
+		objectRick.vecRunFrame.push_back({ 64, 48 });
+		objectRick.vecRunFrame.push_back({ 96, 48 });
+		objectRick.vecRunFrame.push_back({ 128, 48 });
+		objectRick.vecRunFrame.push_back({ 160, 48 });
+
 		objectRick.vVel = { 0.0f, 0.2f };
 		objectRick.C64FileKey = C64FileTileKey.SetHero1;
 
+		// Microsoft
+		objectMSBanner.fID = 2.0f;
+		objectMSBanner.fRadius = 3.0f;
+		objectMSBanner.nRunCurrentFrame = 0;
+		objectMSBanner.nRunFrames = 0;
+		objectMSBanner.pDecal = decMSBanner;
+		objectMSBanner.vCenterPos = { 4.0f, 4.0f };
+		objectMSBanner.vPos = { 3.0f, 3.0f };
+		objectMSBanner.vPotentialPosition = { 0.0f, 0.0f };
+		objectMSBanner.vSize = { 24, 24 };
+		objectMSBanner.vSourceSize = { 32, 32 };
+		objectMSBanner.vSourceStand = { 64, 48 };
+		objectMSBanner.vecRunFrame.clear();
+		objectMSBanner.vVel = { 0.0f, 0.0f };
+		objectRick.C64FileKey = C64FileTileKey.SetHero2;
 
+		// Commodore 64
+		objectC64Banner.fID = 3.0f;
+		objectC64Banner.fRadius = 3.0f;
+		objectC64Banner.nRunCurrentFrame = 0;
+		objectC64Banner.nRunFrames = 0;
+		objectC64Banner.pDecal = decC64Banner;
+		objectC64Banner.vCenterPos = { 4.0f, 4.0f };
+		objectC64Banner.vPos = { 3.0f, 3.0f };
+		objectC64Banner.vPotentialPosition = { 0.0f, 0.0f };
+		objectC64Banner.vSize = { 24, 24 };
+		objectC64Banner.vSourceSize = { 32, 32 };
+		objectC64Banner.vSourceStand = { 64, 48 };
+		objectC64Banner.vecRunFrame.clear();
+		objectC64Banner.vVel = { 0.0f, 0.0f };
+		objectC64Banner.C64FileKey = C64FileTileKey.SetHero3;
 
+		// Commodore 64 Logo
+		objectC64Logo.fID = 4.0f;
+		objectC64Logo.fRadius = 1.0f;
+		objectC64Logo.nRunCurrentFrame = 0;
+		objectC64Logo.nRunFrames = 360;
+		objectC64Logo.pDecal = decC64Logo;
+		objectC64Logo.vCenterPos = { 4.0f, 4.0f };
+		objectC64Logo.vPos = { 3.0f, 3.0f };
+		objectC64Logo.vPotentialPosition = { 0.0f, 0.0f };
+		objectC64Logo.vSize = { 24, 24 };
+		objectC64Logo.vSourceSize = { 32, 32 };
+		objectC64Logo.vSourceStand = { 64, 48 };
+		objectC64Logo.vecRunFrame.clear();
+		objectC64Logo.vVel = { 0.0f, 0.0f };
+		objectC64Logo.C64FileKey = C64FileTileKey.SetHero4;
 
 	}
 
@@ -639,24 +712,28 @@ public:
 		float fRadius = 1.25f;
 		olc::Decal* pDecal = nullptr;
 
+		float fID = 0.01f;
 		bool bEnabled = false;
 		bool bVelChanged = false;
 		bool bRunningRight = false;
 		uint8_t C64FileKey;
 		int nRunCurrentFrame = 0;
+		float fFrameTime = 0.0f;
 		int nRunFrames = 3;
 		olc::vf2d vSourcePos = { 0,0 };
 		olc::vf2d vSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceStand = { 0.0f, 0.0f };
-		olc::vf2d vSourceRun1 = { 0.0f, 0.0f };
-		olc::vf2d vSourceRun2 = { 0.0f, 0.0f };
-		olc::vf2d vSourceRun3 = { 0.0f, 0.0f };
+		std::vector<olc::vf2d> vecRunFrame;
+
 		
 	};
 
 	sWorldObject objectPlayer;
 	sWorldObject objectRick;
+	sWorldObject objectC64Banner;
+	sWorldObject objectMSBanner;
+	sWorldObject objectC64Logo;
 
 
 	bool bFollowObject = false;
@@ -702,374 +779,89 @@ public:
 
 	float testTime = 0.0f;
 
-	void EnableWorldObject(olc::vf2d vTile)
+	void EnableWorldObject(olc::vf2d vTile, sWorldObject* worldObject)
 	{
-		if (!objectRick.bEnabled)
+		if (!worldObject->bEnabled)
 		{
-			objectRick.vPos = vTile;
-			objectRick.vPos.y += - 0.5f;
-			objectRick.vPotentialPosition = vTile;
-			objectRick.bEnabled = true;
-			objectRick.bRunningRight = true;
+			worldObject->vPos = vTile;
+			worldObject->vPos.y += - 0.5f;
+			worldObject->vPotentialPosition = vTile;
+			worldObject->bEnabled = true;
+			worldObject->bRunningRight = true;
 		}
 		
 	}
 
+	void TestCode(float fElapsedTime)
+	{
+		
+	}
 
-	void DrawWorldObjects(float fElaspedTime)
+
+	// Draw the world objects, Heros, Ememies etc
+	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject)
 	{
 
-		if (!objectRick.bEnabled) return;
+		if (!worldObject->bEnabled) return;
 
-		testTime = testTime + fElaspedTime;
-
-		if (testTime > 0.200f)
+		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
+		
+		if (worldObject->fFrameTime > 0.200f)
 		{
-			objectRick.nRunCurrentFrame += 1;
-			if (objectRick.nRunCurrentFrame > objectRick.nRunFrames) objectRick.nRunCurrentFrame = 0;
+			worldObject->nRunCurrentFrame += 1;
+			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size()) worldObject->nRunCurrentFrame = 0;
 
-			testTime = 0.0f;
+			worldObject->fFrameTime = 0.0f;
 
 		}
-
 
 		olc::vf2d vFrame = objectRick.vSourceStand;
 
-		switch (objectRick.nRunCurrentFrame)
+		if (worldObject->vecRunFrame.size() > 0)
 		{
-		case 0:
-			vFrame = objectRick.vSourceStand;
-			break;
-		case 1:
-			vFrame = objectRick.vSourceRun1;
-			break;
-		case 2:
-			vFrame = objectRick.vSourceRun2;
-			break;
-		case 3:
-			vFrame = objectRick.vSourceRun3;
-			break;
-		default:
-			vFrame = objectRick.vSourceStand;
-			break;
+			vFrame = worldObject->vecRunFrame[worldObject->nRunCurrentFrame];
 		}
 
-		if (objectRick.bRunningRight)
+
+		if (worldObject->fID == objectRick.fID)
 		{
-			tv.DrawPartialDecal(objectRick.vPos - olc::vf2d(1.0f, 0.4f), objectRick.vSize, objectRick.pDecal, vFrame, objectRick.vSourceSize);
-		}
-		else
-		{
-			tv.DrawPartialDecal(objectRick.vPos - olc::vf2d(-1.0f, 0.4f), objectRick.vSize * olc::vf2d(-1.0f, 1.0f), objectRick.pDecal, vFrame, objectRick.vSourceSize);
-		}
-		
-
-
-	}
-
-	void HandleGraphics(float fElapsedTime)
-	{
-
-		// Handle player "physics" in response to key presses
-		objectPlayer.vVel = { 0.0f, 0.2f };
-		objectPlayer.pDecal = decColourBalloon;
-		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld)
-		{
-			objectPlayer.vVel += {0, -1}; // up
-			objectPlayer.pDecal = decColourBalloonUp;
-		}
-
-		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld)
-		{
-			objectPlayer.vVel += {0, +1}; // down
-			objectPlayer.pDecal = decColourBalloonDown;
-		}
-			
-		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld)
-		{
-			objectPlayer.vVel += {-1, 0}; // left
-			
-		}
-
-		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld)
-		{
-			objectPlayer.vVel += {+1, 0}; // right
-			
-		}
-
-		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
-
-		// WorldObjects
-		if (objectRick.bEnabled)
-		{
-			objectRick.vVel = { 0.0f, 0.0f };
-			if (objectRick.bRunningRight)
+			if (worldObject->bRunningRight)
 			{
-				objectRick.vVel += {+0.3f, 00.0f};
+				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			}
 			else
 			{
-				objectRick.vVel += {-0.3f, 0};
-			};
-			objectRick.vPotentialPosition = objectRick.vPos + objectRick.vVel * 4.0f * fElapsedTime;
-			objectRick.bVelChanged = true;
-		}
-		
-
-		
-		// true is returned
-		bool bOnScreen = camera.Update(fElapsedTime);
-
-		// Set the transformed view to that required by the camera
-		tv.SetWorldOffset(camera.GetViewPosition());
-
-		/// coll
-		// Where will object be worst case?
-		objectPlayer.vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
-		olc::vf2d vRayToNearest;
-
-		// Render "tile map", by getting visible tiles
-		olc::vi2d vTileTL = tv.GetTopLeftTile().max({ 0,0 });
-		olc::vi2d vTileBR = tv.GetBottomRightTile().min(m_vWorldSize);
-		olc::vi2d vTile;
-		// Then looping through them and drawing them
-		for (vTile.y = vTileTL.y; vTile.y < vTileBR.y; vTile.y++)
-			for (vTile.x = vTileTL.x; vTile.x < vTileBR.x; vTile.x++)
-			{
-				int idx = vTile.y * m_vWorldSize.x + vTile.x;
-
-				// TODO, Lets just set the background to blue
-				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
-				
-				// Lets get our collison
-				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
-				{
-					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
-					
-					if (bShowGrid && bShowGridPlayer)
-					{
-						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
-						continue;
-
-					}
-					
-				}
-
-				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
-				{
-					EnableWorldObject(vTile);
-					if (bShowGrid && bShowGridObjects)
-					{
-						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
-						continue;
-					}
-					
-					
-					
-
-
-				}
-
-				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
-				{
-					HandleCollison(fElapsedTime, &vTile, &objectRick, false);
-
-					if (bShowGrid && bShowGridHero)
-					{
-						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
-						continue;
-					}
-
-					
-				}
-
-				if (vWorldMapEmemies[idx] == C64FileTileKey.SetBlockEmemies)
-				{
-					if (bShowGrid && bShowGridEmemies)
-					{
-						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
-						continue;
-					}
-
-				}
-
-				
-
-				// TODO: Needs refactoring... no time in Jam time
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blank)
-				{
-					if (bShowGrid)
-					{
-						tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
-					}
-						
-					
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.GetSprite)
-				{
-					if (vTile.y > 8)
-					{
-						// We now need the SpriteSheet position
-						// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
-						// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
-						// therefore we need some offsets
-						olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
-						vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
-
-						// OK now we get where in our realWorld to draw the decal
-						olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
-						tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
-						//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
-					}
-					continue;
-				
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Black)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Black);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blue)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Brown)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Brown);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Cyan)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Cyan);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.DarkGrey)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.DarkGrey);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Green)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Grey)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightBlue)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightBlue);
-					continue;
-				}
-			
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGreen)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGreen);
-					continue;
-				}
-
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGrey)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGrey);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightRed)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightRed);
-					continue;
-				}
-
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Orange)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Orange);
-					continue;
-				}
-
-				
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Purple)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Purple);
-					continue;
-				}
-
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Red)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Red);
-					continue;
-				}
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.White)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.White);
-					continue;
-				}
-
-
-				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Yellow)
-				{
-					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Yellow);
-					continue;
-				}
-
-
+				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
+											worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			}
-
-
-		// Some borders 
-		if (vTrackedPoint.x < 0.00f)
-		{
-			vTrackedPoint.x = 0.00f;
-			objectPlayer.vPos.x = 0.0f;
 		}
-		if (vTrackedPoint.x > m_vWorldSize.x)
-		{
-			vTrackedPoint.x = m_vWorldSize.x;
-			objectPlayer.vPos.x = m_vWorldSize.x;
-		}
-
-		if (vTrackedPoint.y < 0.01f)
-		{
-			vTrackedPoint.y = 0.01f;
-			objectPlayer.vPos.y = 0.01f;
-		}
-
-		if (vTrackedPoint.y > m_vWorldSize.y)
-		{
-			vTrackedPoint.y = m_vWorldSize.y;
-			objectPlayer.vPos.y = m_vWorldSize.y;
-		}
-
-
-
-		// Draw our balloon
-		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
-
-		//Draw any WorldObjects that are enabled
-		DrawWorldObjects(fElapsedTime);
-
-
-
-		HandleInput(fElapsedTime, vTile);
 		
+		if (worldObject->fID == objectC64Banner.fID)
+		{
+			tv.DrawRotatedDecal({ worldObject->vPos }, decC64Banner, (3.142f / 2.0f),
+				{ decC64Banner->sprite->width / 2.0f, decC64Banner->sprite->height / 2.0f }, { 0.10f, 0.13f });
+
+		}
+
+		if (worldObject->fID == objectMSBanner.fID)
+		{
+			tv.DrawRotatedDecal({ worldObject->vPos }, decMSBanner, (3.142f / 2.0f),
+				{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.05f, 0.05f });
+		}
+
+		if (worldObject->fID == objectC64Logo.fID)
+		{
+			tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, (3.142f / 2.0f),
+				{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
+			
+		}
+
+		
+
+		
+
 
 	}
-
 
 	// lets get the collision
 	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer)
@@ -1126,7 +918,13 @@ public:
 			if (bShowGridPlayer) vWorldMapPlayer[idx] = C64FileTileKey.SetBlockPlayer;
 			if (bShowGridHero) vWorldMapHero[idx] = C64FileTileKey.SetBlockHero;
 			if (bShowGridEmemies) vWorldMapEmemies[idx] = C64FileTileKey.SetBlockEmemies;
-			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero1;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero1; //Rick
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero2; // Microsoft
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero3; // Commodore
+			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero4;	// Commodore Logo
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEmemies1;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEmemies2;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEmemies3;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
@@ -1180,6 +978,7 @@ public:
 			bShowGridPlayer = true;
 			bShowGridHero = false;
 			bShowGridEmemies = false;
+			bShowGridObjects = false;
 		}
 
 		if (GetKey(olc::K2).bPressed)
@@ -1208,6 +1007,364 @@ public:
 
 	}
 
+
+	// Handle the Game graphics
+	void HandleGraphics(float fElapsedTime)
+	{
+
+		// Handle player "physics" in response to key presses
+		objectPlayer.vVel = { 0.0f, 0.2f };
+		objectPlayer.pDecal = decColourBalloon;
+		if (GetKey(olc::Key::W).bHeld || GetKey(olc::Key::UP).bHeld)
+		{
+			objectPlayer.vVel += {0, -1}; // up
+			objectPlayer.pDecal = decColourBalloonUp;
+		}
+
+		if (GetKey(olc::Key::S).bHeld || GetKey(olc::Key::DOWN).bHeld)
+		{
+			objectPlayer.vVel += {0, +1}; // down
+			objectPlayer.pDecal = decColourBalloonDown;
+		}
+
+		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld)
+		{
+			objectPlayer.vVel += {-1, 0}; // left
+
+		}
+
+		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld)
+		{
+			objectPlayer.vVel += {+1, 0}; // right
+
+		}
+
+		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
+
+		// WorldObjects
+		if (objectRick.bEnabled)
+		{
+			objectRick.vVel = { 0.0f, 0.0f };
+			if (objectRick.bRunningRight)
+			{
+				objectRick.vVel += {+0.3f, 00.0f};
+			}
+			else
+			{
+				objectRick.vVel += {-0.3f, 0};
+			};
+			objectRick.vPotentialPosition = objectRick.vPos + objectRick.vVel * 4.0f * fElapsedTime;
+			objectRick.bVelChanged = true;
+		}
+
+		if (objectC64Logo.bEnabled)
+		{
+			objectC64Logo.vVel = { 0.0f, 0.0f };
+			if (objectC64Logo.bRunningRight)
+			{
+				objectC64Logo.vVel += {+0.3f, 00.0f};
+			}
+			else
+			{
+				objectC64Logo.vVel += {-0.3f, 0};
+			};
+			objectC64Logo.vPotentialPosition = objectC64Logo.vPos + objectC64Logo.vVel * 4.0f * fElapsedTime;
+			objectC64Logo.bVelChanged = true;
+		}
+
+
+
+		// true is returned
+		bool bOnScreen = camera.Update(fElapsedTime);
+
+		// Set the transformed view to that required by the camera
+		tv.SetWorldOffset(camera.GetViewPosition());
+
+		/// coll
+		// Where will object be worst case?
+		objectPlayer.vPotentialPosition = objectPlayer.vPos + objectPlayer.vVel * 4.0f * fElapsedTime;
+		olc::vf2d vRayToNearest;
+
+		// Render "tile map", by getting visible tiles
+		olc::vi2d vTileTL = tv.GetTopLeftTile().max({ 0,0 });
+		olc::vi2d vTileBR = tv.GetBottomRightTile().min(m_vWorldSize);
+		olc::vi2d vTile;
+		// Then looping through them and drawing them
+		for (vTile.y = vTileTL.y; vTile.y < vTileBR.y; vTile.y++)
+			for (vTile.x = vTileTL.x; vTile.x < vTileBR.x; vTile.x++)
+			{
+				int idx = vTile.y * m_vWorldSize.x + vTile.x;
+
+				// TODO, Lets just set the background to blue
+				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+
+				// Lets get our collison
+				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
+				{
+					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
+					
+
+					if (bShowGrid && bShowGridPlayer)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
+						continue;
+
+					}
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
+				{
+					EnableWorldObject(vTile, &objectRick);
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero2)
+				{
+					EnableWorldObject(vTile, &objectMSBanner);
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Orange);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero3)
+				{
+					EnableWorldObject(vTile, &objectC64Banner);
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightGreen);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero4)
+				{
+					EnableWorldObject(vTile, &objectC64Logo);
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Purple);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
+				{
+					HandleCollison(fElapsedTime, &vTile, &objectRick, false);
+					HandleCollison(fElapsedTime, &vTile, &objectC64Banner, false);
+					HandleCollison(fElapsedTime, &vTile, &objectMSBanner, false);
+					HandleCollison(fElapsedTime, &vTile, &objectC64Logo, false);
+
+					if (bShowGrid && bShowGridHero)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapEmemies[idx] == C64FileTileKey.SetBlockEmemies)
+				{
+					if (bShowGrid && bShowGridEmemies)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
+						continue;
+					}
+
+				}
+
+
+
+				// TODO: Needs refactoring... no time in Jam time
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blank)
+				{
+					if (bShowGrid)
+					{
+						tv.DrawRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.DarkGrey);
+					}
+
+
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.GetSprite)
+				{
+					if (vTile.y > 8)
+					{
+						// We now need the SpriteSheet position
+						// We know our screen is 320X240, and our SpriteSheet is 2048X160 and it is anchored to bottom of the screen
+						// We do not care about the space below 80 realworld / 5 view world, and we dont care about the width
+						// therefore we need some offsets
+						olc::vi2d vSourcePos = { vTile.x, vTile.y - 10 }; // SpriteSheet Title position
+						vSourcePos = vSourcePos * tv.GetWorldScale(); // SpriteSheet pixel position
+
+						// OK now we get where in our realWorld to draw the decal
+						olc::vi2d vScreenPos = vTile * tv.GetWorldScale();
+						tv.DrawPartialDecal(vTile, tv.GetWorldScale(), decC64Level, vSourcePos, tv.GetWorldScale());
+						//tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
+					}
+					continue;
+
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Black)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Black);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blue)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Brown)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Brown);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Cyan)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Cyan);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.DarkGrey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.DarkGrey);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Green)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Grey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Green);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightBlue)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightBlue);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGreen)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGreen);
+					continue;
+				}
+
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightGrey)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightGrey);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.LightRed)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.LightRed);
+					continue;
+				}
+
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Orange)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Orange);
+					continue;
+				}
+
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Purple)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Purple);
+					continue;
+				}
+
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Red)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Red);
+					continue;
+				}
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.White)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.White);
+					continue;
+				}
+
+
+				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Yellow)
+				{
+					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Yellow);
+					continue;
+				}
+
+
+			}
+
+
+		// Some borders 
+		if (vTrackedPoint.x < 0.00f)
+		{
+			vTrackedPoint.x = 0.00f;
+			objectPlayer.vPos.x = 0.0f;
+		}
+		if (vTrackedPoint.x > m_vWorldSize.x)
+		{
+			vTrackedPoint.x = m_vWorldSize.x;
+			objectPlayer.vPos.x = m_vWorldSize.x;
+		}
+
+		if (vTrackedPoint.y < 0.01f)
+		{
+			vTrackedPoint.y = 0.01f;
+			objectPlayer.vPos.y = 0.01f;
+		}
+
+		if (vTrackedPoint.y > m_vWorldSize.y)
+		{
+			vTrackedPoint.y = m_vWorldSize.y;
+			objectPlayer.vPos.y = m_vWorldSize.y;
+		}
+
+
+		// Draw our balloon
+		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
+
+		//Draw any WorldObjects that are enabled
+		DrawWorldObjects(fElapsedTime, &objectRick);
+		DrawWorldObjects(fElapsedTime, &objectC64Banner);
+		DrawWorldObjects(fElapsedTime, &objectMSBanner);
+		DrawWorldObjects(fElapsedTime, &objectC64Logo);
+
+
+
+		HandleInput(fElapsedTime, vTile);
+
+
+	}
 	// Game Save
 	private:
 
@@ -1336,7 +1493,6 @@ public:
 		C64CreateColourBalloonSpriteLeft();
 		C64CreateColourBalloonSpriteRight();
 
-
 		// Construct transform view
 		tv = olc::TileTransformedView(GetScreenSize(), m_vTileSize);
 
@@ -1363,9 +1519,7 @@ public:
 		vWorldMapObjects_undo.resize(m_vWorldSize.x * m_vWorldSize.y);
 
 
-		// Set default
-		/*for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
-			vWorldMapPlayerGraphics[i] = ((rand() % 20) == 1) ? 1 : 0;*/
+		// Set default to C64FileKeyBlank
 		for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 		{
 			vWorldMapPlayerGraphics[i] = C64FileTileKey.Blank;
@@ -1384,8 +1538,13 @@ public:
 		// Load Level 1
 		LoadLevel(1);
 
+		// Load the sprite sheets
 		LoadSpriteSheets();
 
+		// Create the world objects, Heros, Ememies
+		CreateWorldObjects();
+
+		// Set the player start position
 		objectPlayer.vPos = { 3.0f, 3.0f };
 		objectPlayer.vCenterPos = { 4.0f, 4.0f };
 		objectPlayer.pDecal = decColourBalloon;
@@ -1426,7 +1585,6 @@ public:
 		//if (GetMouse(0).bHeld) DrawDecal(GetMousePos(), decBalloon);
 
 		HandleGraphics(fElapsedTime);
-
 
 		return true;
 	}

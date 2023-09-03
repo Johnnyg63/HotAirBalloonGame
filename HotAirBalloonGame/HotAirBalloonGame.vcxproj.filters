@@ -78,5 +78,11 @@
     <Image Include="assets\VixenSpriteSheet.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\Microsoft1983Banner.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\CommodoreLogo.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>

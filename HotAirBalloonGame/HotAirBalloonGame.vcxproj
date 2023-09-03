@@ -150,6 +150,8 @@
     <Image Include="assets\BitsSpriteSheet.png" />
     <Image Include="assets\C64LevelOne.png" />
     <Image Include="assets\Commodore64Banner.png" />
+    <Image Include="assets\CommodoreLogo.png" />
+    <Image Include="assets\Microsoft1983Banner.png" />
     <Image Include="assets\olcbanner.png" />
     <Image Include="assets\RickEmemiesSpriteSheet.png" />
     <Image Include="assets\RickSpriteSheet.png" />
