@@ -681,7 +681,7 @@ private:
 
 		// Commodore 64 Logo
 		objectC64Logo.fID = 4.0f;
-		objectC64Logo.fRadius = 1.0f;
+		objectC64Logo.fRadius = 0.5f;
 		objectC64Logo.nRunCurrentFrame = 0;
 		objectC64Logo.nRunFrames = 360;
 		objectC64Logo.pDecal = decC64Logo;
@@ -693,6 +693,7 @@ private:
 		objectC64Logo.vSourceStand = { 64, 48 };
 		objectC64Logo.vecRunFrame.clear();
 		objectC64Logo.vVel = { 0.0f, 0.0f };
+		objectC64Logo.fRototaion = 0.12;
 		objectC64Logo.C64FileKey = C64FileTileKey.SetHero4;
 
 	}
@@ -716,6 +717,7 @@ public:
 		bool bEnabled = false;
 		bool bVelChanged = false;
 		bool bRunningRight = false;
+		float fRototaion = 0.0f; 
 		uint8_t C64FileKey;
 		int nRunCurrentFrame = 0;
 		float fFrameTime = 0.0f;
@@ -725,6 +727,8 @@ public:
 		olc::vf2d vSourceSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceStand = { 0.0f, 0.0f };
 		std::vector<olc::vf2d> vecRunFrame;
+		olc::vf2d vStartPos = { 0.0f, 0.0f };
+		olc::vf2d vEndPos = { 0.0f, 0.0f };
 
 		
 	};
@@ -785,6 +789,9 @@ public:
 		{
 			worldObject->vPos = vTile;
 			worldObject->vPos.y += - 0.5f;
+			worldObject->vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+			worldObject->vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
 			worldObject->vPotentialPosition = vTile;
 			worldObject->bEnabled = true;
 			worldObject->bRunningRight = true;
@@ -805,7 +812,7 @@ public:
 		if (!worldObject->bEnabled) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
-		
+		float rotation = 0.125;
 		if (worldObject->fFrameTime > 0.200f)
 		{
 			worldObject->nRunCurrentFrame += 1;
@@ -849,10 +856,24 @@ public:
 				{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.05f, 0.05f });
 		}
 
+		
 		if (worldObject->fID == objectC64Logo.fID)
 		{
-			tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, (3.142f / 2.0f),
-				{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
+			
+			if (worldObject->bRunningRight)
+			{
+				worldObject->fRototaion += rotation;
+				tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, worldObject->fRototaion,
+					{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
+			}
+			else
+			{
+				worldObject->fRototaion += -rotation;
+				tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, worldObject->fRototaion,
+					{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
+			}
+
+		
 			
 		}
 
@@ -888,7 +909,19 @@ public:
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
 			if (!bIsPlayer)
 			{
-				worldObject->bRunningRight = !worldObject->bRunningRight;
+				if (worldObject->bRunningRight)
+				{
+					worldObject->vEndPos.x = vTile->x;
+					worldObject->vEndPos.y = vTile->y;
+					worldObject->bRunningRight = false;
+				}
+				else
+				{
+					worldObject->vStartPos.x = vTile->x;
+					worldObject->vStartPos.y = vTile->y;
+					worldObject->bRunningRight = true;
+				}
+				
 				
 			}
 			
@@ -901,7 +934,7 @@ public:
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
 		{
-			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
+			//tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
 		}
 	}
 
@@ -1062,11 +1095,11 @@ public:
 			objectC64Logo.vVel = { 0.0f, 0.0f };
 			if (objectC64Logo.bRunningRight)
 			{
-				objectC64Logo.vVel += {+0.3f, 00.0f};
+				objectC64Logo.vVel += {+0.8f, 00.0f};
 			}
 			else
 			{
-				objectC64Logo.vVel += {-0.3f, 0};
+				objectC64Logo.vVel += {-0.8f, 0};
 			};
 			objectC64Logo.vPotentialPosition = objectC64Logo.vPos + objectC64Logo.vVel * 4.0f * fElapsedTime;
 			objectC64Logo.bVelChanged = true;
@@ -1353,6 +1386,11 @@ public:
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
+		HandleBorders(&objectRick);
+		HandleBorders(&objectC64Banner);
+		HandleBorders(&objectMSBanner);
+		HandleBorders(&objectC64Logo);
+
 		//Draw any WorldObjects that are enabled
 		DrawWorldObjects(fElapsedTime, &objectRick);
 		DrawWorldObjects(fElapsedTime, &objectC64Banner);
@@ -1365,6 +1403,37 @@ public:
 
 
 	}
+
+	void HandleBorders(sWorldObject* worldObject)
+	{
+		if (worldObject->vPos.x < 0.00f || worldObject->vPos.x < worldObject->vStartPos.x)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+			worldObject->bVelChanged = false;
+		}
+		if (worldObject->vPos.x > m_vWorldSize.x || worldObject->vPos.x > worldObject->vEndPos.x)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+			worldObject->bVelChanged = false;
+		}
+
+		if (worldObject->vPos.y < 0.01f)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+			worldObject->bVelChanged = false;
+		}
+
+		if (worldObject->vPos.y > m_vWorldSize.y)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+			worldObject->bVelChanged = false;
+		}
+	}
+
 	// Game Save
 	private:
 
