@@ -17,10 +17,10 @@
 
 
 // Override base class with your custom functionality
-class Example : public olc::PixelGameEngine
+class HotAirBalloon : public olc::PixelGameEngine
 {
 public:
-	Example()
+	HotAirBalloon()
 	{
 		// Name your application
 		sAppName = "Hot Air Balloon Johnnyg63";
@@ -155,10 +155,16 @@ private:
 	std::string strLineBreak = " ";
 	std::string strHeaderText2 = "64K RAM SYSTEM 38911 BASIC BYTES FREE";
 	std::string strReady = "READY.";
+	std::string strPrint = "PRINT OLC CODEJAM 2023: JOHNNYG64";
+	std::string strPrintRes = "OLC CODEJAM 2023: JOHNNYG64";
 	std::string strLoad = "LOAD";
 	std::string strPlay = "PRESS PLAY ON TAPE";
 	std::string strLoading = "LOADING...";
 	std::string strRun = "RUN";
+	std::string strMovement = "USE ARROW KEYS OR WSAD TO MOVE";
+	std::string strMission = "YOUR MISSION IS TO HELP ALL THE C64 HEROS";
+	std::string strCOPY1 = "This demo is for eduction purposes only, images, logos and trademarks are owned by their respective identities";
+	std::string strCOPY2 = "Power by OLC Pixel Game Engine 2.0. C OneLoneCoder.com 2023";
 
 	float fDisplayTime = 0.0f;
 
@@ -214,7 +220,7 @@ private:
 	void C64DisplayScreen()
 	{
 
-		FillRectDecal({ 20,20 }, { 280, 160 }, C64Color.Blue);
+		FillRectDecal({ 20,20 }, { 280, 200 }, C64Color.Blue);
 
 	}
 
@@ -225,12 +231,14 @@ private:
 		DrawStringPropDecal({ 45, 30 }, strHeaderText1, C64Color.LightBlue, { 1.0f, 0.8f });
 		DrawStringPropDecal({ 30, 40 }, strHeaderText2, C64Color.LightBlue, { 1.0f, 0.8f });
 		DrawStringPropDecal({ 22, 60 }, strReady, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 1.0f) DrawStringPropDecal({ 22, 70 }, strPrint, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 1.2f) DrawStringPropDecal({ 22, 80 }, strPrintRes, C64Color.LightBlue, { 1.0f, 0.8f });
 
-		if (fDisplayTime > 2.0f) DrawStringPropDecal({ 22, 70 }, strLoad, C64Color.LightBlue, { 1.0f, 0.8f });
-		if (fDisplayTime > 3.0f) DrawStringPropDecal({ 22, 90 }, strPlay, C64Color.LightBlue, { 1.0f, 0.8f });
-		if (fDisplayTime > 5.0f) DrawStringPropDecal({ 22, 100 }, strLoading, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 2.0f) DrawStringPropDecal({ 22, 90 }, strLoad, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 3.0f) DrawStringPropDecal({ 22, 100 }, strPlay, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 5.0f) DrawStringPropDecal({ 22, 110 }, strLoading, C64Color.LightBlue, { 1.0f, 0.8f });
 		if (fDisplayTime > 5.0 && fDisplayTime < 8.0) { bGameLoading = true; }
-		if (fDisplayTime > 8.0f) DrawStringPropDecal({ 22, 110 }, strRun, C64Color.LightBlue, { 1.0f, 0.8f });
+		if (fDisplayTime > 8.0f) DrawStringPropDecal({ 22, 120 }, strRun, C64Color.LightBlue, { 1.0f, 0.8f });
 		if (fDisplayTime > 10.5f) bGameLoaded = true;
 
 	}
@@ -796,11 +804,6 @@ public:
 			worldObject->bEnabled = true;
 			worldObject->bRunningRight = true;
 		}
-		
-	}
-
-	void TestCode(float fElapsedTime)
-	{
 		
 	}
 
@@ -1633,17 +1636,17 @@ public:
 
 		//if (!bStartRec) return true;
 
-		//
-		//if (!bGameLoaded)
-		//{
-		//	FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
-		//	// We display the C64 screen and loading screen until the 'game' is loaded
-		//	if (bGameLoading) C64LoadingScreen();
-		//	C64DisplayScreen();
-		//	C64DisplayHeader(fElapsedTime);
-		//	
-		//	return true;
-		//}
+		
+		if (!bGameLoaded)
+		{
+			FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
+			// We display the C64 screen and loading screen until the 'game' is loaded
+			if (bGameLoading) C64LoadingScreen();
+			C64DisplayScreen();
+			C64DisplayHeader(fElapsedTime);
+			
+			return true;
+		}
 
 		//FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.Blue);
 		//
@@ -1653,7 +1656,15 @@ public:
 		//
 		//if (GetMouse(0).bHeld) DrawDecal(GetMousePos(), decBalloon);
 
+
 		HandleGraphics(fElapsedTime);
+
+		DrawStringPropDecal({ 15, 20 }, strPrintRes, C64Color.LightBlue, { 1.0f, 0.8f });
+		DrawStringPropDecal({ 15, 30 }, strMovement, C64Color.LightBlue, { 1.0f, 0.8f });
+		DrawStringPropDecal({ 15, 40 }, strMission, C64Color.LightBlue, { 1.0f, 0.8f });
+
+		DrawStringPropDecal({ 15, 225 }, strCOPY1, C64Color.White, { 0.4f, 0.4f });
+		DrawStringPropDecal({ 15, 230 }, strCOPY2, C64Color.White, { 0.4f, 0.4f });
 
 		return true;
 	}
@@ -1664,7 +1675,7 @@ public:
 
 int main()
 {
-	Example demo;
+	HotAirBalloon demo;
 	if (demo.Construct(320, 240, 4, 3))
 		demo.Start();
 	return 0;
