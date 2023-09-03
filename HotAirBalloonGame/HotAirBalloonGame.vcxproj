@@ -140,11 +140,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\levelone.bin" />
-    <None Include="WASM\basic_template.html" />
-    <None Include="WASM\pge.html" />
-    <None Include="WASM\pge.js" />
-    <None Include="WASM\pge.wasm" />
-    <None Include="WASM\pge2wasm.bat" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\BitsSpriteSheet.png" />
