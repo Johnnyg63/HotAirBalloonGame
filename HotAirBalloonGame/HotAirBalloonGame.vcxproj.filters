@@ -40,15 +40,6 @@
     <None Include="assets\levelone.bin">
       <Filter>assets</Filter>
     </None>
-    <None Include="WASM\pge.html">
-      <Filter>WASM</Filter>
-    </None>
-    <None Include="WASM\pge.js">
-      <Filter>WASM</Filter>
-    </None>
-    <None Include="WASM\pge.wasm">
-      <Filter>WASM</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\C64LevelOne.png">
