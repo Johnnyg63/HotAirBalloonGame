@@ -16,6 +16,9 @@
     <Filter Include="assets">
       <UniqueIdentifier>{49057d2e-40d8-4642-be8b-22da8e0ce56a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="WASM">
+      <UniqueIdentifier>{fb260d10-e67e-4cb0-9144-c7fb31d5bc2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HotAirBalloon.cpp">
@@ -36,6 +39,15 @@
   <ItemGroup>
     <None Include="assets\levelone.bin">
       <Filter>assets</Filter>
+    </None>
+    <None Include="WASM\pge.html">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="WASM\pge.js">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="WASM\pge.wasm">
+      <Filter>WASM</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
