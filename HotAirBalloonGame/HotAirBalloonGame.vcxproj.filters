@@ -37,36 +37,48 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\levelone.bin">
+    <None Include="WASM\pge.html">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="WASM\pge.js">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="WASM\pge.wasm">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="WASM\pge.data">
+      <Filter>WASM</Filter>
+    </None>
+    <None Include="assets\levelonea.bin">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\C64LevelOne.png">
+    <Image Include="assets\bitsspritesheeta.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\olcbanner.png">
+    <Image Include="assets\clevelonea.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\Commodore64Banner.png">
+    <Image Include="assets\commodorebannera.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\BitsSpriteSheet.png">
+    <Image Include="assets\commodorelogoa.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\RickEmemiesSpriteSheet.png">
+    <Image Include="assets\microsoftbannera.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\RickSpriteSheet.png">
+    <Image Include="assets\olcbannera.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\VixenSpriteSheet.png">
+    <Image Include="assets\rickenemiesspritesheeta.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\Microsoft1983Banner.png">
+    <Image Include="assets\rickspritesheeta.png">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\CommodoreLogo.png">
+    <Image Include="assets\vixenspritesheeta.png">
       <Filter>assets</Filter>
     </Image>
   </ItemGroup>

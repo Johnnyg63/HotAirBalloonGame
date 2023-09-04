@@ -139,18 +139,22 @@
     <ClInclude Include="olcUTIL_Camera2D.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\levelone.bin" />
+    <None Include="assets\levelonea.bin" />
+    <None Include="WASM\pge.data" />
+    <None Include="WASM\pge.html" />
+    <None Include="WASM\pge.js" />
+    <None Include="WASM\pge.wasm" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\BitsSpriteSheet.png" />
-    <Image Include="assets\C64LevelOne.png" />
-    <Image Include="assets\Commodore64Banner.png" />
-    <Image Include="assets\CommodoreLogo.png" />
-    <Image Include="assets\Microsoft1983Banner.png" />
-    <Image Include="assets\olcbanner.png" />
-    <Image Include="assets\RickEmemiesSpriteSheet.png" />
-    <Image Include="assets\RickSpriteSheet.png" />
-    <Image Include="assets\VixenSpriteSheet.png" />
+    <Image Include="assets\bitsspritesheeta.png" />
+    <Image Include="assets\clevelonea.png" />
+    <Image Include="assets\commodorebannera.png" />
+    <Image Include="assets\commodorelogoa.png" />
+    <Image Include="assets\microsoftbannera.png" />
+    <Image Include="assets\olcbannera.png" />
+    <Image Include="assets\rickenemiesspritesheeta.png" />
+    <Image Include="assets\rickspritesheeta.png" />
+    <Image Include="assets\vixenspritesheeta.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

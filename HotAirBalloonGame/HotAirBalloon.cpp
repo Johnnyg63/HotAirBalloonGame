@@ -607,26 +607,26 @@ private:
 
 		// 1: We need the level graphics
 		// CopyRight: https://www.spriters-resource.com/commodore_64/gianasisters30thanniversaryhack/sheet/199050/
-		sprC64Level = new olc::Sprite("./assets/C64LevelOne.png");
+		sprC64Level = new olc::Sprite("assets/clevelonea.png");
 		decC64Level = new olc::Decal(sprC64Level);
 
-		sprC64Banner = new olc::Sprite("./assets/Commodore64Banner.png");
+		sprC64Banner = new olc::Sprite("assets/commodorebannera.png");
 		decC64Banner = new olc::Decal(sprC64Banner);
 
-		sprMSBanner = new olc::Sprite("./assets/Microsoft1983Banner.png");
+		sprMSBanner = new olc::Sprite("assets/microsoftbannera.png");
 		decMSBanner = new olc::Decal(sprMSBanner);
 
-		sprC64Logo = new olc::Sprite("./assets/CommodoreLogo.png");
+		sprC64Logo = new olc::Sprite("assets/commodorelogoa.png");
 		decC64Logo = new olc::Decal(sprC64Logo);
 
-		LoadMap("./assets/Levelone.bin");
+		LoadMap("assets/levelonea.bin");
 
 	}
 
 
 	void LoadSpriteSheets()
 	{
-		sprRickSpriteSheet = new olc::Sprite("./assets/RickSpriteSheet.png");
+		sprRickSpriteSheet = new olc::Sprite("assets/rickspritesheeta.png");
 		decRickSpriteSheet = new olc::Decal(sprRickSpriteSheet);
 
 	}
@@ -980,13 +980,13 @@ public:
 		{
 			// load a file
 
-			LoadMap("./assets/levelone.bin");
+			LoadMap("assets/levelonea.bin");
 		}
 
 		if (GetKey(olc::R).bPressed)
 		{
 			// Save a file
-			SaveMap("./assets/levelone.bin");
+			SaveMap("assets/levelonea.bin");
 		}
 
 		if (GetKey(olc::C).bPressed)
