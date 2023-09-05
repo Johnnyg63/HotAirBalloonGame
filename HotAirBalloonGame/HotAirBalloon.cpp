@@ -626,7 +626,6 @@ private:
 
 	}
 
-
 	void LoadSpriteSheets()
 	{
 		sprRickSpriteSheet = new olc::Sprite("assets/rickspritesheeta.png");
@@ -640,6 +639,8 @@ private:
 	void CreateWorldObjects()
 	{
 		// Rick
+		sWorldObject objectRick;
+
 		objectRick.fID = 1.0f;
 		objectRick.fRadius = 1.0f;
 		objectRick.nRunCurrentFrame = 0;
@@ -653,15 +654,20 @@ private:
 		objectRick.vSourceStand = { 64, 48 };
 
 		objectRick.vecRunFrame.clear();
-		objectRick.vecRunFrame.push_back({ 64, 48 });
 		objectRick.vecRunFrame.push_back({ 96, 48 });
 		objectRick.vecRunFrame.push_back({ 128, 48 });
 		objectRick.vecRunFrame.push_back({ 160, 48 });
+		objectRick.vecRunFrame.push_back({ 192, 48 });
+		objectRick.vecRunFrame.push_back({ 224, 48 });
 
 		objectRick.vVel = { 0.0f, 0.2f };
 		objectRick.C64FileKey = C64FileTileKey.SetHero1;
 
+		vecObjectHeros.push_back({ objectRick });
+
+
 		// Egyptian
+		sWorldObject objectEgyptian;	// Enemies Egyptian object
 		objectEgyptian.fID = 5.0f;
 		objectEgyptian.fRadius = 1.0f;
 		objectEgyptian.nRunCurrentFrame = 0;
@@ -679,10 +685,11 @@ private:
 		objectEgyptian.vecRunFrame.push_back({ 64, 48 });
 		objectEgyptian.vecRunFrame.push_back({ 96, 48 });
 		//objectEgyptian.vecRunFrame.push_back({ 128, 48 });
-		
 
 		objectEgyptian.vVel = { 0.0f, 0.2f };
-		objectEgyptian.C64FileKey = C64FileTileKey.SetHero1;
+		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies1;
+
+		vecObjectEnemies.push_back({ objectEgyptian });
 
 		// Microsoft
 		objectMSBanner.fID = 2.0f;
@@ -771,8 +778,11 @@ public:
 	};
 
 	sWorldObject objectPlayer;		// Player Decal Object
-	sWorldObject objectRick;		// Hero Rick Danagerous object
-	sWorldObject objectEgyptian;	// Enemies Egyptian object
+	//sWorldObject objectRick;		// Hero Rick Danagerous object
+	//sWorldObject objectEgyptian;	// Enemies Egyptian object
+
+	std::vector<sWorldObject> vecObjectHeros;
+	std::vector<sWorldObject> vecObjectEnemies;
 
 
 
@@ -828,6 +838,11 @@ public:
 	{
 		if (!worldObject->bEnabled)
 		{
+			if (worldObject->fID == 1.0f)
+			{
+				int pause = 0;
+				pause++;
+			}
 			worldObject->vPos = vTile;
 			worldObject->vPos.y += - 0.5f;
 			worldObject->vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
@@ -848,6 +863,11 @@ public:
 		if (!worldObject->bEnabled) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
+		if (worldObject->fID == 1.0f)
+		{
+			int pause = 0;
+			pause++;
+		}
 		float rotation = 0.125;
 		if (worldObject->fFrameTime > 0.200f)
 		{
@@ -858,40 +878,14 @@ public:
 
 		}
 
-		olc::vf2d vFrame = objectRick.vSourceStand;
+		olc::vf2d vFrame = worldObject->vSourceStand;
 
 		if (worldObject->vecRunFrame.size() > 0)
 		{
 			vFrame = worldObject->vecRunFrame[worldObject->nRunCurrentFrame];
 		}
 
-
-		if (worldObject->fID == objectRick.fID)
-		{
-			if (worldObject->bRunningRight)
-			{
-				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
-			}
-			else
-			{
-				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
-											worldObject->pDecal, vFrame, worldObject->vSourceSize);
-			}
-		}
-
-		if (worldObject->fID == objectEgyptian.fID)
-		{
-			if (worldObject->bRunningRight)
-			{
-				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
-			}
-			else
-			{
-				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
-					worldObject->pDecal, vFrame, worldObject->vSourceSize);
-			}
-		}
-		
+		// Speical Case
 		if (worldObject->fID == objectC64Banner.fID)
 		{
 			tv.DrawRotatedDecal({ worldObject->vPos }, decC64Banner, (3.142f / 2.0f),
@@ -903,12 +897,13 @@ public:
 		{
 			tv.DrawRotatedDecal({ worldObject->vPos }, decMSBanner, (3.142f / 2.0f),
 				{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.05f, 0.05f });
+			return;
 		}
 
-		
+
 		if (worldObject->fID == objectC64Logo.fID)
 		{
-			
+
 			if (worldObject->bRunningRight)
 			{
 				worldObject->fRototaion += rotation;
@@ -922,9 +917,22 @@ public:
 					{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
 			}
 
-		
-			
+			return;
+
 		}
+
+
+		if (worldObject->bRunningRight)
+		{
+			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+		}
+		else
+		{
+			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
+				worldObject->pDecal, vFrame, worldObject->vSourceSize);
+		}
+
+		
 
 		
 
@@ -1123,36 +1131,44 @@ public:
 
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
 
-		// WorldObjects
-		if (objectRick.bEnabled)
+		for (auto& worldObject : vecObjectHeros)
 		{
-			objectRick.vVel = { 0.0f, 0.0f };
-			if (objectRick.bRunningRight)
+			if (worldObject.bEnabled)
 			{
-				objectRick.vVel += {+0.3f, 00.0f};
+				worldObject.vVel = { 0.0f, 0.0f };
+				if (worldObject.bRunningRight)
+				{
+					worldObject.vVel += {+0.3f, 00.0f};
+				}
+				else
+				{
+					worldObject.vVel += {-0.3f, 0};
+				};
+				worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+				worldObject.bVelChanged = true;
 			}
-			else
+			
+		}
+		//vecObjectEnemies
+		for (auto& worldObject : vecObjectEnemies)
+		{
+			if (worldObject.bEnabled)
 			{
-				objectRick.vVel += {-0.3f, 0};
-			};
-			objectRick.vPotentialPosition = objectRick.vPos + objectRick.vVel * 4.0f * fElapsedTime;
-			objectRick.bVelChanged = true;
+				worldObject.vVel = { 0.0f, 0.0f };
+				if (worldObject.bRunningRight)
+				{
+					worldObject.vVel += {+0.3f, 00.0f};
+				}
+				else
+				{
+					worldObject.vVel += {-0.3f, 0};
+				};
+				worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+				worldObject.bVelChanged = true;
+			}
+
 		}
 
-		if (objectEgyptian.bEnabled)
-		{
-			objectEgyptian.vVel = { 0.0f, 0.0f };
-			if (objectEgyptian.bRunningRight)
-			{
-				objectEgyptian.vVel += {+0.3f, 00.0f};
-			}
-			else
-			{
-				objectEgyptian.vVel += {-0.3f, 0};
-			};
-			objectEgyptian.vPotentialPosition = objectEgyptian.vPos + objectEgyptian.vVel * 4.0f * fElapsedTime;
-			objectEgyptian.bVelChanged = true;
-		}
 
 		if (objectC64Logo.bEnabled)
 		{
@@ -1214,7 +1230,14 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
 				{
-					EnableWorldObject(vTile, &objectRick, true);
+					for (auto& worldObject : vecObjectHeros)
+					{
+						if (worldObject.C64FileKey == C64FileTileKey.SetHero1)
+						{
+							EnableWorldObject(vTile, &worldObject, true);
+						}
+					}
+					
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
@@ -1262,7 +1285,14 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies1)
 				{
-					EnableWorldObject(vTile, &objectEgyptian, false);
+					for (auto& worldObject : vecObjectEnemies)
+					{
+						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies1)
+						{
+							EnableWorldObject(vTile, &worldObject, false);
+						}
+					}
+					
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightRed);
@@ -1274,7 +1304,14 @@ public:
 
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
-					HandleCollison(fElapsedTime, &vTile, &objectRick, false);
+					for (auto& worldObject : vecObjectHeros)
+					{
+						if (worldObject.C64FileKey == C64FileTileKey.SetHero1)
+						{
+							HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+						}
+					}
+					
 					HandleCollison(fElapsedTime, &vTile, &objectC64Banner, false);
 					HandleCollison(fElapsedTime, &vTile, &objectMSBanner, false);
 					HandleCollison(fElapsedTime, &vTile, &objectC64Logo, false);
@@ -1290,7 +1327,14 @@ public:
 
 				if (vWorldMapEnemies[idx] == C64FileTileKey.SetBlockEnemies)
 				{
-					HandleCollison(fElapsedTime, &vTile, &objectEgyptian, false);
+					for (auto& worldObject : vecObjectEnemies)
+					{
+						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies1)
+						{
+							HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+						}
+					}
+					
 					if (bShowGrid && bShowGridEnemies)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
@@ -1465,15 +1509,23 @@ public:
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
-		HandleBorders(&objectRick);
-		HandleBorders(&objectEgyptian);
+		for (auto& worldObject : vecObjectHeros)
+		{
+			HandleBorders(&worldObject);
+			DrawWorldObjects(fElapsedTime, &worldObject);
+		}
+
+		for (auto& worldObject : vecObjectEnemies)
+		{
+			HandleBorders(&worldObject);
+			DrawWorldObjects(fElapsedTime, &worldObject);
+		}
+		
 		HandleBorders(&objectC64Banner);
 		HandleBorders(&objectMSBanner);
 		HandleBorders(&objectC64Logo);
 
 		//Draw any WorldObjects that are enabled
-		DrawWorldObjects(fElapsedTime, &objectRick);
-		DrawWorldObjects(fElapsedTime, &objectEgyptian);
 		DrawWorldObjects(fElapsedTime, &objectC64Banner);
 		DrawWorldObjects(fElapsedTime, &objectMSBanner);
 		DrawWorldObjects(fElapsedTime, &objectC64Logo);
