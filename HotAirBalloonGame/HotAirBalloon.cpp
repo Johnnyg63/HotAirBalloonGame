@@ -668,7 +668,7 @@ private:
 
 		// Egyptian
 		sWorldObject objectEgyptian;	// Enemies Egyptian object
-		objectEgyptian.fID = 5.0f;
+		objectEgyptian.fID = 20.0f;
 		objectEgyptian.fRadius = 1.0f;
 		objectEgyptian.nRunCurrentFrame = 0;
 		objectEgyptian.nRunFrames = 3;
@@ -691,8 +691,34 @@ private:
 
 		vecObjectEnemies.push_back({ objectEgyptian });
 
+		// Egyptian
+		sWorldObject objectSoldier;	// Enemies Egyptian object
+		objectEgyptian.fID = 5.0f;
+		objectEgyptian.fRadius = 1.0f;
+		objectEgyptian.nRunCurrentFrame = 0;
+		objectEgyptian.nRunFrames = 3;
+		objectEgyptian.pDecal = decEnemiesSpriteSheet;
+		objectEgyptian.vCenterPos = { 4.0f, 4.0f };
+		objectEgyptian.vPos = { 3.0f, 3.0f };
+		objectEgyptian.vPotentialPosition = { 0.0f, 0.0f };
+		objectEgyptian.vSize = { 24, 24 };
+		objectEgyptian.vSourceSize = { 32, 32 };
+		objectEgyptian.vSourceStand = { 224, 48 };
+
+		objectEgyptian.vecRunFrame.clear();
+		objectEgyptian.vecRunFrame.push_back({ 256, 48 });
+		objectEgyptian.vecRunFrame.push_back({ 32, 80 });
+		objectEgyptian.vecRunFrame.push_back({ 64, 80 });
+		//objectEgyptian.vecRunFrame.push_back({ 96, 80 });
+
+		objectEgyptian.vVel = { 0.0f, 0.2f };
+		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies2;
+
+		vecObjectEnemies.push_back({ objectEgyptian });
+
+
 		// Microsoft
-		objectMSBanner.fID = 2.0f;
+		objectMSBanner.fID = 25.0f;
 		objectMSBanner.fRadius = 3.0f;
 		objectMSBanner.nRunCurrentFrame = 0;
 		objectMSBanner.nRunFrames = 0;
@@ -778,13 +804,9 @@ public:
 	};
 
 	sWorldObject objectPlayer;		// Player Decal Object
-	//sWorldObject objectRick;		// Hero Rick Danagerous object
-	//sWorldObject objectEgyptian;	// Enemies Egyptian object
-
+	
 	std::vector<sWorldObject> vecObjectHeros;
 	std::vector<sWorldObject> vecObjectEnemies;
-
-
 
 	sWorldObject objectC64Banner;
 	sWorldObject objectMSBanner;
@@ -1012,8 +1034,8 @@ public:
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero2; // Microsoft
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero3; // Commodore
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero4;	// Commodore Logo
-			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies1;
-			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies2;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies1;
+			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies2;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies3;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
@@ -1186,9 +1208,6 @@ public:
 		}
 
 
-
-
-
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
 
@@ -1302,6 +1321,25 @@ public:
 
 				}
 
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies2)
+				{
+					for (auto& worldObject : vecObjectEnemies)
+					{
+						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies2)
+						{
+							EnableWorldObject(vTile, &worldObject, false);
+						}
+					}
+
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
+						continue;
+					}
+
+
+				}
+
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
 					for (auto& worldObject : vecObjectHeros)
@@ -1329,10 +1367,7 @@ public:
 				{
 					for (auto& worldObject : vecObjectEnemies)
 					{
-						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies1)
-						{
-							HandleCollison(fElapsedTime, &vTile, &worldObject, false);
-						}
+						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
 					}
 					
 					if (bShowGrid && bShowGridEnemies)
@@ -1342,8 +1377,6 @@ public:
 					}
 
 				}
-
-
 
 				// TODO: Needs refactoring... no time in Jam time
 				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blank)
@@ -1539,31 +1572,37 @@ public:
 
 	void HandleBorders(sWorldObject* worldObject)
 	{
-		if (worldObject->vPos.x < 0.00f || worldObject->vPos.x < worldObject->vStartPos.x)
+
+
+		if (worldObject->vPos.x < 0.00f || 
+			worldObject->vPos.x < worldObject->vStartPos.x ||
+			worldObject->vPos.x < tv.GetTopLeftTile().x)
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
 			worldObject->bVelChanged = false;
 		}
-		if (worldObject->vPos.x > m_vWorldSize.x || worldObject->vPos.x > worldObject->vEndPos.x)
+		if (worldObject->vPos.x > m_vWorldSize.x || 
+			worldObject->vPos.x > worldObject->vEndPos.x ||
+			worldObject->vPos.x > tv.GetBottomRightTile().x)
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			worldObject->bVelChanged = false;
+			
 		}
 
 		if (worldObject->vPos.y < 0.01f)
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			worldObject->bVelChanged = false;
+			
 		}
 
 		if (worldObject->vPos.y > m_vWorldSize.y)
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			worldObject->bVelChanged = false;
+			
 		}
 	}
 
