@@ -152,6 +152,7 @@
     <Image Include="assets\commodorelogoa.png" />
     <Image Include="assets\microsoftbannera.png" />
     <Image Include="assets\olcbannera.png" />
+    <Image Include="assets\rickenemiesspritesheetb.png" />
     <Image Include="assets\rickenemiesspritesheeta.png" />
     <Image Include="assets\rickspritesheeta.png" />
     <Image Include="assets\vixenspritesheeta.png" />

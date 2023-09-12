@@ -81,5 +81,8 @@
     <Image Include="assets\vixenspritesheeta.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\rickenemiesspritesheetb.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>
