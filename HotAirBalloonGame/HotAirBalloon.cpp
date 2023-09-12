@@ -639,9 +639,8 @@ private:
 	void CreateWorldObjects()
 	{
 		// Rick
-		sWorldObject objectRick;
 
-		objectRick.fID = 1.0f;
+		objectRick.fID = 100.0f;
 		objectRick.fRadius = 1.0f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
@@ -663,12 +662,11 @@ private:
 		objectRick.vVel = { 0.0f, 0.2f };
 		objectRick.C64FileKey = C64FileTileKey.SetHero1;
 
-		vecObjectHeros.push_back({ objectRick });
-
+		//vecObjectHeros.push_back({ objectRick });
 
 		// Egyptian
-		sWorldObject objectEgyptian;	// Enemies Egyptian object
-		objectEgyptian.fID = 20.0f;
+		
+		objectEgyptian.fID = 200.0f;
 		objectEgyptian.fRadius = 1.0f;
 		objectEgyptian.nRunCurrentFrame = 0;
 		objectEgyptian.nRunFrames = 3;
@@ -689,36 +687,36 @@ private:
 		objectEgyptian.vVel = { 0.0f, 0.2f };
 		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies1;
 
-		vecObjectEnemies.push_back({ objectEgyptian });
+		//vecObjectEnemies.push_back({ objectEgyptian });
 
-		// Egyptian
-		sWorldObject objectSoldier;	// Enemies Egyptian object
-		objectEgyptian.fID = 5.0f;
-		objectEgyptian.fRadius = 1.0f;
-		objectEgyptian.nRunCurrentFrame = 0;
-		objectEgyptian.nRunFrames = 3;
-		objectEgyptian.pDecal = decEnemiesSpriteSheet;
-		objectEgyptian.vCenterPos = { 4.0f, 4.0f };
-		objectEgyptian.vPos = { 3.0f, 3.0f };
-		objectEgyptian.vPotentialPosition = { 0.0f, 0.0f };
-		objectEgyptian.vSize = { 24, 24 };
-		objectEgyptian.vSourceSize = { 32, 32 };
-		objectEgyptian.vSourceStand = { 224, 48 };
+		// Soldier
+		
+		objectSoldier.fID = 300.0f;
+		objectSoldier.fRadius = 1.0f;
+		objectSoldier.nRunCurrentFrame = 0;
+		objectSoldier.nRunFrames = 3;
+		objectSoldier.pDecal = decEnemiesSpriteSheet;
+		objectSoldier.vCenterPos = { 4.0f, 4.0f };
+		objectSoldier.vPos = { 3.0f, 3.0f };
+		objectSoldier.vPotentialPosition = { 0.0f, 0.0f };
+		objectSoldier.vSize = { 24, 24 };
+		objectSoldier.vSourceSize = { 32, 32 };
+		objectSoldier.vSourceStand = { 224, 48 };
 
-		objectEgyptian.vecRunFrame.clear();
-		objectEgyptian.vecRunFrame.push_back({ 256, 48 });
-		objectEgyptian.vecRunFrame.push_back({ 32, 80 });
-		objectEgyptian.vecRunFrame.push_back({ 64, 80 });
-		//objectEgyptian.vecRunFrame.push_back({ 96, 80 });
+		objectSoldier.vecRunFrame.clear();
+		objectSoldier.vecRunFrame.push_back({ 256, 48 });
+		objectSoldier.vecRunFrame.push_back({ 32, 80 });
+		objectSoldier.vecRunFrame.push_back({ 64, 80 });
+		//objectSoldier.vecRunFrame.push_back({ 96, 80 });
 
-		objectEgyptian.vVel = { 0.0f, 0.2f };
-		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies2;
+		objectSoldier.vVel = { 0.0f, 0.2f };
+		objectSoldier.C64FileKey = C64FileTileKey.SetEnemies2;
 
-		vecObjectEnemies.push_back({ objectEgyptian });
+		vecObjectEnemies.push_back({ objectSoldier });
 
 
 		// Microsoft
-		objectMSBanner.fID = 25.0f;
+		objectMSBanner.fID = 400.0f;
 		objectMSBanner.fRadius = 3.0f;
 		objectMSBanner.nRunCurrentFrame = 0;
 		objectMSBanner.nRunFrames = 0;
@@ -733,8 +731,10 @@ private:
 		objectMSBanner.vVel = { 0.0f, 0.0f };
 		objectRick.C64FileKey = C64FileTileKey.SetHero2;
 
+		vecObjectHeros.push_back({ objectMSBanner });
+
 		// Commodore 64
-		objectC64Banner.fID = 3.0f;
+		objectC64Banner.fID = 500.0f;
 		objectC64Banner.fRadius = 3.0f;
 		objectC64Banner.nRunCurrentFrame = 0;
 		objectC64Banner.nRunFrames = 0;
@@ -749,8 +749,10 @@ private:
 		objectC64Banner.vVel = { 0.0f, 0.0f };
 		objectC64Banner.C64FileKey = C64FileTileKey.SetHero3;
 
+		vecObjectHeros.push_back({ objectC64Banner });
+
 		// Commodore 64 Logo
-		objectC64Logo.fID = 4.0f;
+		objectC64Logo.fID = 600.0f;
 		objectC64Logo.fRadius = 0.5f;
 		objectC64Logo.nRunCurrentFrame = 0;
 		objectC64Logo.nRunFrames = 360;
@@ -765,6 +767,70 @@ private:
 		objectC64Logo.vVel = { 0.0f, 0.0f };
 		objectC64Logo.fRototaion = 0.12;
 		objectC64Logo.C64FileKey = C64FileTileKey.SetHero4;
+
+		vecObjectHeros.push_back({ objectC64Logo });
+
+	}
+
+	void LoadWorldObjectsIntoMap()
+	{
+		for (int i = 0; i < vWorldMapHero.size(); i++)
+		{
+			if (vWorldMapObjects[i] == C64FileTileKey.SetHero1)
+			{
+				sWorldObject worldObject = objectRick;
+				worldObject.fStartIndex = i;
+				vecObjectHeros.push_back({ worldObject });
+			}
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetHero2)
+			{
+				sWorldObject worldObject = objectMSBanner;
+				worldObject.fStartIndex = i;
+				vecObjectHeros.push_back({ worldObject });
+			}
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetHero3)
+			{
+				sWorldObject worldObject = objectC64Banner;
+				worldObject.fStartIndex = i;
+				vecObjectHeros.push_back({ worldObject });
+			}
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetHero4)
+			{
+				sWorldObject worldObject = objectC64Logo;
+				worldObject.fStartIndex = i;
+				vecObjectHeros.push_back({ worldObject });
+			}
+		}
+
+		for (int i = 0; i < vWorldMapEnemies.size(); i++)
+		{
+			if (vWorldMapObjects[i] == C64FileTileKey.SetEnemies1)
+			{
+				sWorldObject worldObject = objectEgyptian;
+				worldObject.fStartIndex = i;
+				vecObjectEnemies.push_back({ worldObject });
+			}
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetEnemies2)
+			{
+				sWorldObject worldObject = objectSoldier;
+				worldObject.fStartIndex = i;
+				vecObjectEnemies.push_back({ worldObject });
+			}
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetEnemies3)
+			{
+				sWorldObject worldObject = objectC64Banner;
+				worldObject.fStartIndex = i;
+				vecObjectEnemies.push_back({ worldObject });
+			}
+
+			
+		}
+
 
 	}
 
@@ -800,6 +866,8 @@ public:
 		olc::vf2d vStartPos = { 0.0f, 0.0f };
 		olc::vf2d vEndPos = { 0.0f, 0.0f };
 
+		int fStartIndex = 0;
+
 		
 	};
 
@@ -808,9 +876,19 @@ public:
 	std::vector<sWorldObject> vecObjectHeros;
 	std::vector<sWorldObject> vecObjectEnemies;
 
+	sWorldObject objectRick;
+	sWorldObject objectEgyptian;	// Enemies Egyptian object
+	sWorldObject objectSoldier;		// Enemies Soldier object
+
 	sWorldObject objectC64Banner;
 	sWorldObject objectMSBanner;
 	sWorldObject objectC64Logo;
+
+	enum WorldObjectType
+	{
+		HeroObject,
+		EnemiesObject
+	};
 
 
 	bool bFollowObject = false;
@@ -856,23 +934,49 @@ public:
 
 	float testTime = 0.0f;
 
-	void EnableWorldObject(olc::vf2d vTile, sWorldObject* worldObject, bool bRunningRight)
+	void EnableWorldObject(olc::vf2d vTile, WorldObjectType objectType, bool bRunningRight, int fStartIndex, uint8_t C64FileType)
 	{
-		if (!worldObject->bEnabled)
-		{
-			if (worldObject->fID == 1.0f)
-			{
-				int pause = 0;
-				pause++;
-			}
-			worldObject->vPos = vTile;
-			worldObject->vPos.y += - 0.5f;
-			worldObject->vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
-			worldObject->vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+		bool bFoundObject = false;
 
-			worldObject->vPotentialPosition = vTile;
-			worldObject->bEnabled = true;
-			worldObject->bRunningRight = bRunningRight;
+
+		switch (objectType)
+		{
+		case HotAirBalloon::HeroObject:
+			for (auto& worldObject : vecObjectHeros)
+			{
+				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
+				{
+					worldObject.vPos = vTile;
+					worldObject.vPos.y += -0.5f;
+					worldObject.vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+					worldObject.vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
+					worldObject.vPotentialPosition = vTile;
+					worldObject.bEnabled = true;
+					worldObject.bRunningRight = bRunningRight;
+					break;
+				}
+			}
+			break;
+		case HotAirBalloon::EnemiesObject:
+			for (auto& worldObject : vecObjectEnemies)
+			{
+				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
+				{
+					worldObject.vPos = vTile;
+					worldObject.vPos.y += -0.5f;
+					worldObject.vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+					worldObject.vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
+					worldObject.vPotentialPosition = vTile;
+					worldObject.bEnabled = true;
+					worldObject.bRunningRight = bRunningRight;
+					break;
+				}
+			}
+			break;
+		default:
+			break;
 		}
 		
 	}
@@ -1249,13 +1353,7 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
 				{
-					for (auto& worldObject : vecObjectHeros)
-					{
-						if (worldObject.C64FileKey == C64FileTileKey.SetHero1)
-						{
-							EnableWorldObject(vTile, &worldObject, true);
-						}
-					}
+					EnableWorldObject(vTile, WorldObjectType::HeroObject, true, idx, vWorldMapObjects[idx]);
 					
 					if (bShowGrid && bShowGridObjects)
 					{
@@ -1268,7 +1366,7 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero2)
 				{
-					EnableWorldObject(vTile, &objectMSBanner, true);
+					EnableWorldObject(vTile, WorldObjectType::HeroObject, true, idx, vWorldMapObjects[idx]);
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Orange);
@@ -1280,7 +1378,7 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero3)
 				{
-					EnableWorldObject(vTile, &objectC64Banner, true);
+					EnableWorldObject(vTile, WorldObjectType::HeroObject, true, idx, vWorldMapObjects[idx]);
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightGreen);
@@ -1292,7 +1390,7 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero4)
 				{
-					EnableWorldObject(vTile, &objectC64Logo, true);
+					EnableWorldObject(vTile, WorldObjectType::HeroObject, true, idx, vWorldMapObjects[idx]);
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Purple);
@@ -1304,13 +1402,14 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies1)
 				{
-					for (auto& worldObject : vecObjectEnemies)
+					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, true, idx, vWorldMapObjects[idx]);
+					/*for (auto& worldObject : vecObjectEnemies)
 					{
 						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies1)
 						{
 							EnableWorldObject(vTile, &worldObject, false);
 						}
-					}
+					}*/
 					
 					if (bShowGrid && bShowGridObjects)
 					{
@@ -1323,11 +1422,12 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies2)
 				{
+					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, true, idx, vWorldMapObjects[idx]);
 					for (auto& worldObject : vecObjectEnemies)
 					{
 						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies2)
 						{
-							EnableWorldObject(vTile, &worldObject, false);
+							//EnableWorldObject(vTile, &worldObject, false);
 						}
 					}
 
@@ -1784,6 +1884,9 @@ public:
 
 		// Create the world objects, Heros, Enemies
 		CreateWorldObjects();
+
+		// Load the world object
+		LoadWorldObjectsIntoMap();
 
 		// Set the player start position
 		objectPlayer.vPos = { 3.0f, 3.0f };
