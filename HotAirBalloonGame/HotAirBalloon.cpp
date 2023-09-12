@@ -111,14 +111,14 @@ public:
 		uint8_t SetBlockHero = -110;	// Sets a block for Hero collison
 		uint8_t SetBlockEnemies = -120; // Sets a block for Enemies collison
 
-		uint8_t SetHero1 = -130;	// Set position for heros		
-		uint8_t SetHero2 = -140;	// Set position for heros
-		uint8_t SetHero3 = -150;	// Set position for heros
-		uint8_t SetHero4 = -155;	// Set position for heros
+		uint8_t SetHero1 = 130;	// Set position for heros		
+		uint8_t SetHero2 = 140;	// Set position for heros
+		uint8_t SetHero3 = 150;	// Set position for heros
+		uint8_t SetHero4 = 160;	// Set position for heros
 
-		uint8_t SetEnemies1 = -160;	// Set position for Enemies
-		uint8_t SetEnemies2 = -170; // Set position for Enemies
-		uint8_t SetEnemies3 = -180; // Set position for Enemies
+		uint8_t SetEnemies1 = 170;	// Set position for Enemies
+		uint8_t SetEnemies2 = 180; // Set position for Enemies
+		uint8_t SetEnemies3 = 190; // Set position for Enemies
 
 
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
@@ -1403,14 +1403,7 @@ public:
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies1)
 				{
 					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, true, idx, vWorldMapObjects[idx]);
-					/*for (auto& worldObject : vecObjectEnemies)
-					{
-						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies1)
-						{
-							EnableWorldObject(vTile, &worldObject, false);
-						}
-					}*/
-					
+										
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightRed);
@@ -1422,15 +1415,8 @@ public:
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies2)
 				{
-					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, true, idx, vWorldMapObjects[idx]);
-					for (auto& worldObject : vecObjectEnemies)
-					{
-						if (worldObject.C64FileKey == C64FileTileKey.SetEnemies2)
-						{
-							//EnableWorldObject(vTile, &worldObject, false);
-						}
-					}
-
+					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, false, idx, vWorldMapObjects[idx]);
+					
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
