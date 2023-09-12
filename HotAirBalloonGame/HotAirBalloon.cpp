@@ -649,6 +649,7 @@ private:
 	{
 		// Rick
 		objectRick.fID = 100.0f;
+		objectRick.fVelX = 0.5f;
 		objectRick.fRadius = 1.0f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
@@ -672,6 +673,9 @@ private:
 
 		// Microsoft
 		objectMSBanner.fID = 200.0f;
+		objectMSBanner.fVelX = 0.0f;
+		objectMSBanner.fVelY = 0.0f;
+		objectMSBanner.bCanMove = false;
 		objectMSBanner.fRadius = 3.0f;
 		objectMSBanner.nRunCurrentFrame = 0;
 		objectMSBanner.nRunFrames = 0;
@@ -688,6 +692,9 @@ private:
 
 		// Commodore 64
 		objectC64Banner.fID = 300.0f;
+		objectC64Banner.fVelX = 0.0f;
+		objectC64Banner.fVelY = 0.0f;
+		objectC64Banner.bCanMove = false;
 		objectC64Banner.fRadius = 3.0f;
 		objectC64Banner.nRunCurrentFrame = 0;
 		objectC64Banner.nRunFrames = 0;
@@ -704,6 +711,8 @@ private:
 
 		// Commodore 64 Logo
 		objectC64Logo.fID = 400.0f;
+		objectC64Logo.fVelX = 0.3f;
+		objectC64Logo.fVelY = 0.0f;
 		objectC64Logo.fRadius = 0.5f;
 		objectC64Logo.nRunCurrentFrame = 0;
 		objectC64Logo.nRunFrames = 360;
@@ -940,6 +949,9 @@ public:
 	{
 		olc::vf2d vPos;
 		olc::vf2d vVel;
+		float fVelX = 0.3f;
+		float fVelY = 0.0f;
+
 		olc::vf2d vCenterPos;
 		olc::vf2d vPotentialPosition;
 		float fRadius = 1.25f;
@@ -1121,7 +1133,8 @@ public:
 		if (worldObject->fID == objectC64Banner.fID)
 		{
 			tv.DrawRotatedDecal({ worldObject->vPos }, decC64Banner, (3.142f / 2.0f),
-				{ decC64Banner->sprite->width / 2.0f, decC64Banner->sprite->height / 2.0f }, { 0.10f, 0.13f });
+				{ float(decC64Banner->sprite->width / 2.0f), float(decC64Banner->sprite->height / 2.0f) }, { 0.10f, 0.13f });
+			return;
 
 		}
 
@@ -1190,23 +1203,28 @@ public:
 		{
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-			if (!bIsPlayer)
+			// Speical Case
 			{
-				if (worldObject->bRunningRight)
+				if (!bIsPlayer)
 				{
-					worldObject->vEndPos.x = vTile->x;
-					worldObject->vEndPos.y = vTile->y;
-					worldObject->bRunningRight = false;
+
+					if (worldObject->bRunningRight)
+					{
+						worldObject->vEndPos.x = vTile->x;
+						worldObject->vEndPos.y = vTile->y;
+						worldObject->bRunningRight = false;
+					}
+					else
+					{
+						worldObject->vStartPos.x = vTile->x;
+						worldObject->vStartPos.y = vTile->y;
+						worldObject->bRunningRight = true;
+					}
+
+
 				}
-				else
-				{
-					worldObject->vStartPos.x = vTile->x;
-					worldObject->vStartPos.y = vTile->y;
-					worldObject->bRunningRight = true;
-				}
-				
-				
 			}
+			
 			
 		}
 
@@ -1219,6 +1237,9 @@ public:
 		{
 			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
 		}
+
+		
+
 	}
 
 	// Handle input for graphics 
@@ -1237,13 +1258,13 @@ public:
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero1; //Rick
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero2; // Microsoft
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero3; // Commodore
-			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero4;	// Commodore Logo
+			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetHero4;	// Commodore Logo
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies1;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies2;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies3;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies4;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies5;
-			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies6;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies6;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
@@ -1366,18 +1387,20 @@ public:
 			{
 				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
 				worldObject.vVel = { 0.0f, 0.0f };
-				if (worldObject.bRunningRight)
+				if (worldObject.bCanMove)
 				{
-					worldObject.vVel += {+0.3f, 00.0f};
+					if (worldObject.bRunningRight)
+					{
+						worldObject.vVel += {+worldObject.fVelX, worldObject.fVelY};
+					}
+					else
+					{
+						worldObject.vVel += {-worldObject.fVelX, -worldObject.fVelY};
+					};
+					worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+					worldObject.bVelChanged = true;
 				}
-				else
-				{
-					worldObject.vVel += {-0.3f, 0};
-				};
-				worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
-				worldObject.bVelChanged = true;
 
-				
 			}
 			
 		}
@@ -1388,16 +1411,20 @@ public:
 			{
 				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
 				worldObject.vVel = { 0.0f, 0.0f };
-				if (worldObject.bRunningRight)
+				if (worldObject.bCanMove)
 				{
-					worldObject.vVel += {+0.3f, 00.0f};
+					if (worldObject.bRunningRight)
+					{
+						worldObject.vVel += {+worldObject.fVelX, worldObject.fVelY};
+					}
+					else
+					{
+						worldObject.vVel += {-worldObject.fVelX, worldObject.fVelY};
+					};
+					worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+					worldObject.bVelChanged = true;
 				}
-				else
-				{
-					worldObject.vVel += {-0.3f, 0};
-				};
-				worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
-				worldObject.bVelChanged = true;
+				
 			}
 
 		}
@@ -1571,17 +1598,11 @@ public:
 
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
+
 					for (auto& worldObject : vecObjectHeros)
 					{
-						if (worldObject.C64FileKey == C64FileTileKey.SetHero1)
-						{
-							HandleCollison(fElapsedTime, &vTile, &worldObject, false);
-						}
+						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
 					}
-					
-					HandleCollison(fElapsedTime, &vTile, &objectC64Banner, false);
-					HandleCollison(fElapsedTime, &vTile, &objectMSBanner, false);
-					HandleCollison(fElapsedTime, &vTile, &objectC64Logo, false);
 
 					if (bShowGrid && bShowGridHero)
 					{
@@ -1783,17 +1804,7 @@ public:
 			DrawWorldObjects(fElapsedTime, &worldObject, true);
 		}
 		
-		HandleBorders(&objectC64Banner);
-		HandleBorders(&objectMSBanner);
-		HandleBorders(&objectC64Logo);
-
-		//Draw any WorldObjects that are enabled
-		DrawWorldObjects(fElapsedTime, &objectC64Banner, true);
-		DrawWorldObjects(fElapsedTime, &objectMSBanner, true);
-		DrawWorldObjects(fElapsedTime, &objectC64Logo, true);
-
-
-
+		
 		HandleInput(fElapsedTime, vTile);
 
 
