@@ -784,6 +784,7 @@ private:
 
 		// foot soldier
 		objectFootSoldier.fID = 500.0f;
+		objectFootSoldier.bIsForeGround = false;
 		objectFootSoldier.fRadius = 1.0f;
 		objectFootSoldier.nRunCurrentFrame = 0;
 		objectFootSoldier.nRunFrames = 3;
@@ -920,6 +921,9 @@ public:
 		bool bEnabled = false;
 		bool bVelChanged = false;
 		bool bRunningRight = false;
+		bool bIsForeGround = true;
+		bool bCanMove = true;
+
 		float fRototaion = 0.0f; 
 		uint8_t C64FileKey;
 		int nRunCurrentFrame = 0;
@@ -1056,10 +1060,11 @@ public:
 
 
 	// Draw the world objects, Heros, Enemies etc
-	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject)
+	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject, bool bIsForeGround)
 	{
 
 		if (!worldObject->bEnabled) return;
+		if (bIsForeGround != worldObject->bIsForeGround) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
 		if (worldObject->fID == 1.0f)
@@ -1330,6 +1335,7 @@ public:
 		{
 			if (worldObject.bEnabled)
 			{
+				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
 				worldObject.vVel = { 0.0f, 0.0f };
 				if (worldObject.bRunningRight)
 				{
@@ -1341,6 +1347,8 @@ public:
 				};
 				worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
 				worldObject.bVelChanged = true;
+
+				
 			}
 			
 		}
@@ -1349,6 +1357,7 @@ public:
 		{
 			if (worldObject.bEnabled)
 			{
+				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
 				worldObject.vVel = { 0.0f, 0.0f };
 				if (worldObject.bRunningRight)
 				{
@@ -1387,7 +1396,7 @@ public:
 				int idx = vTile.y * m_vWorldSize.x + vTile.x;
 
 				// TODO, Lets just set the background to blue
-				tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
+				//tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Blue);
 
 				// Lets get our collison
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
@@ -1723,13 +1732,13 @@ public:
 		for (auto& worldObject : vecObjectHeros)
 		{
 			HandleBorders(&worldObject);
-			DrawWorldObjects(fElapsedTime, &worldObject);
+			DrawWorldObjects(fElapsedTime, &worldObject, true);
 		}
 
 		for (auto& worldObject : vecObjectEnemies)
 		{
 			HandleBorders(&worldObject);
-			DrawWorldObjects(fElapsedTime, &worldObject);
+			DrawWorldObjects(fElapsedTime, &worldObject, true);
 		}
 		
 		HandleBorders(&objectC64Banner);
@@ -1737,9 +1746,9 @@ public:
 		HandleBorders(&objectC64Logo);
 
 		//Draw any WorldObjects that are enabled
-		DrawWorldObjects(fElapsedTime, &objectC64Banner);
-		DrawWorldObjects(fElapsedTime, &objectMSBanner);
-		DrawWorldObjects(fElapsedTime, &objectC64Logo);
+		DrawWorldObjects(fElapsedTime, &objectC64Banner, true);
+		DrawWorldObjects(fElapsedTime, &objectMSBanner, true);
+		DrawWorldObjects(fElapsedTime, &objectC64Logo, true);
 
 
 
