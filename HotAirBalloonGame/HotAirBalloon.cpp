@@ -124,6 +124,7 @@ public:
 		uint8_t SetEnemies3 = 190; // Set position for Enemies
 		uint8_t SetEnemies4 = 195; // Set position for Enemies
 		uint8_t SetEnemies5 = 200; // Set position for Enemies
+		uint8_t SetEnemies6 = 205; // Set position for Enemies
 
 
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
@@ -783,7 +784,7 @@ private:
 		objectWarrior.C64FileKey = C64FileTileKey.SetEnemies3;
 
 		// foot soldier
-		objectFootSoldier.fID = 500.0f;
+		objectFootSoldier.fID = 800.0f;
 		objectFootSoldier.bIsForeGround = false;
 		objectFootSoldier.fRadius = 1.0f;
 		objectFootSoldier.nRunCurrentFrame = 0;
@@ -804,7 +805,7 @@ private:
 		objectFootSoldier.C64FileKey = C64FileTileKey.SetEnemies4;
 
 		// officer
-		objectOfficer.fID = 500.0f;
+		objectOfficer.fID = 900.0f;
 		objectOfficer.fRadius = 1.0f;
 		objectOfficer.nRunCurrentFrame = 0;
 		objectOfficer.nRunFrames = 3;
@@ -821,7 +822,27 @@ private:
 		objectOfficer.vecRunFrame.push_back({ 160, 80 });
 
 		objectOfficer.vVel = { 0.0f, 0.2f };
-		objectOfficer.C64FileKey = C64FileTileKey.SetEnemies4;
+		objectOfficer.C64FileKey = C64FileTileKey.SetEnemies5;
+
+		objectMummy.fID = 1000.0f;
+		objectMummy.bIsForeGround = true;
+		objectMummy.fRadius = 1.0f;
+		objectMummy.nRunCurrentFrame = 0;
+		objectMummy.nRunFrames = 3;
+		objectMummy.pDecal = decEnemiesSpriteSheetb;
+		objectMummy.vCenterPos = { 4.0f, 4.0f };
+		objectMummy.vPos = { 3.0f, 3.0f };
+		objectMummy.vPotentialPosition = { 0.0f, 0.0f };
+		objectMummy.vSize = { 24, 24 };
+		objectMummy.vSourceSize = { 32, 32 };
+		objectMummy.vSourceStand = { 224, 114 };
+
+		objectMummy.vecRunFrame.clear();
+		objectMummy.vecRunFrame.push_back({ 224, 144 });
+		objectMummy.vecRunFrame.push_back({ 256, 144 });
+
+		objectMummy.vVel = { 0.0f, 0.2f };
+		objectMummy.C64FileKey = C64FileTileKey.SetEnemies6;
 		
 	}
 
@@ -896,6 +917,13 @@ private:
 				vecObjectEnemies.push_back({ worldObject });
 			}
 
+
+			if (vWorldMapObjects[i] == C64FileTileKey.SetEnemies6)
+			{
+				sWorldObject worldObject = objectMummy;
+				worldObject.fStartIndex = i;
+				vecObjectEnemies.push_back({ worldObject });
+			}
 			
 		}
 
@@ -955,9 +983,9 @@ public:
 	sWorldObject objectEgyptian;	// Enemies Egyptian object
 	sWorldObject objectSoldier;		// Enemies Soldier object
 	sWorldObject objectWarrior;		// Enemies Worrior object
-	sWorldObject objectFootSoldier;	// Enemies Egyptian object
-	sWorldObject objectOfficer;		// Enemies Soldier object
-	//sWorldObject objectWarrior;		// Enemies Worrior object
+	sWorldObject objectFootSoldier;	// Enemies Foot Soldier object
+	sWorldObject objectOfficer;		// Enemies Offier object
+	sWorldObject objectMummy;		// Enemies Mummy object
 
 	
 
@@ -1202,7 +1230,7 @@ public:
 			tv.FillRectDecal(vTile, { 1.0f, 1.0f }, olc::Pixel(60, 60, 60, 127));
 
 			int idx = vTilePos.y * m_vWorldSize.x + vTilePos.x;
-			//vWorldMapPlayerGraphics[idx] = C64FileTileKey.Black;
+			//vWorldMapPlayerGraphics[idx] = C64FileTileKey.GetSprite;
 			if (bShowGridPlayer) vWorldMapPlayer[idx] = C64FileTileKey.SetBlockPlayer;
 			if (bShowGridHero) vWorldMapHero[idx] = C64FileTileKey.SetBlockHero;
 			if (bShowGridEnemies) vWorldMapEnemies[idx] = C64FileTileKey.SetBlockEnemies;
@@ -1213,8 +1241,9 @@ public:
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies1;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies2;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies3;
-			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies4;
+			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies4;
 			//if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies5;
+			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.SetEnemies6;
 		}
 		if (GetMouse(1).bHeld || GetMouse(1).bPressed)
 		{
@@ -1515,6 +1544,19 @@ public:
 				}
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies5)
+				{
+					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, false, idx, vWorldMapObjects[idx]);
+
+					if (bShowGrid && bShowGridObjects)
+					{
+						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightGreen);
+						continue;
+					}
+
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies6)
 				{
 					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, false, idx, vWorldMapObjects[idx]);
 
