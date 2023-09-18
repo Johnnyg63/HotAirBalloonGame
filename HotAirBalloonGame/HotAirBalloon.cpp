@@ -150,7 +150,7 @@ public:
 	};
 	C64FileTileKeys C64FileTileKey;
 
-	
+
 
 	/* Game Vars */
 	bool bGameLoaded = false;
@@ -895,8 +895,8 @@ private:
 		objectPlayer.vCenterPos = { 4.0f, 4.0f };
 		objectPlayer.vStartPos = { 2.0, 3.0 };
 		objectPlayer.vEndPos = m_vWorldSize;
-		
-		
+
+
 
 	}
 
@@ -1022,6 +1022,9 @@ public:
 		int nDefaultLives = 5;
 		int nLives = 1;
 		float fGodModeTime = 0.0f;
+		float fTottleTime = 0.0f;
+		float fFlashTime = 0.1665f;
+		float bShowHide = true;
 
 		float fRototaion = 0.0f;
 		uint8_t C64FileKey;
@@ -1117,7 +1120,7 @@ public:
 		case HotAirBalloon::HeroObject:
 			for (auto& worldObject : vecObjectHeros)
 			{
-				if(worldObject.bIsDead) continue;
+				if (worldObject.bIsDead) continue;
 				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
 				{
 					worldObject.vPos = vTile;
@@ -1165,16 +1168,13 @@ public:
 	// Draw the world objects, Heros, Enemies etc
 	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject, bool bIsForeGround)
 	{
+		
 
 		if (!worldObject->bEnabled || worldObject->bIsDead) return;
 		if (bIsForeGround != worldObject->bIsForeGround) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
-		if (worldObject->fID == 1.0f)
-		{
-			int pause = 0;
-			pause++;
-		}
+
 		float rotation = 0.125;
 		if (worldObject->fFrameTime > 0.200f)
 		{
@@ -1229,15 +1229,28 @@ public:
 
 		}
 
+		if (!worldObject->bCanLoseLives)
+		{
+			// Right we are in god mode lets flash
+			worldObject->fTottleTime += fElaspedTime;
+			if (worldObject->fTottleTime > worldObject->fFlashTime)
+			{
+				worldObject->fTottleTime = 0.0f;
+				worldObject->bShowHide = !worldObject->bShowHide;
+			}
+		}
 
 		if (worldObject->bRunningRight)
 		{
-			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			
+			if (worldObject->bCanLoseLives || worldObject->bShowHide) 
+				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 		}
 		else
 		{
-			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
-				worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			if (worldObject->bCanLoseLives || worldObject->bShowHide)
+				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(-1.0f, 0.4f), worldObject->vSize * olc::vf2d(-1.0f, 1.0f),
+					worldObject->pDecal, vFrame, worldObject->vSourceSize);
 		}
 
 
@@ -1305,7 +1318,7 @@ public:
 
 	}
 
-	
+
 	// Handles if a object has hit another object
 	void HandleObjectCollison(sWorldObject* testObject1, sWorldObject* worldObject, bool bIsPlayer)
 	{
@@ -1348,51 +1361,35 @@ public:
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
 
-			if (bIsPlayer)
+			// lets check did we hit a bomb or another enemies
+			if (testObject1->eObjecttype == HeroObject)
 			{
-				// lets check did we hit a bomb or another enemies
-				if (testObject1->eObjecttype == HeroObject)
-				{
-					// the hero is fine to touch
-					// TODO:
-					int test = 0;
-					test++;
-				}
-				else
-				{
-					// Only execute if the object can lose lives
-					if (worldObject->bCanLoseLives)
-					{
-						worldObject->nLives--;
-
-						if (worldObject->nLives < 1)
-						{
-							worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
-							worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
-							worldObject->nLives == 5;
-
-						}
-						worldObject->bCanLoseLives = false;
-					}
-
-				}
-
+				// the hero is fine to touch
+				// TODO:
+				int test = 0;
+				test++;
 			}
 			else
 			{
+				// Only execute if the object can lose lives
 				if (worldObject->bCanLoseLives)
 				{
 					worldObject->nLives--;
+
 					if (worldObject->nLives < 1)
 					{
-						// we we are dead folks
-						worldObject->bIsDead = true;
+						worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+						worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 						worldObject->bEnabled = false;
+						worldObject->bIsDead = true;
+
 					}
 					worldObject->bCanLoseLives = false;
 				}
 
 			}
+
+
 
 
 		}
@@ -1550,6 +1547,63 @@ public:
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
 
+		}
+	}
+
+
+	float fLifeTime;
+	// Handles the lost of a life
+	void HandleGodMode(float fElapsedTime, sWorldObject* worldObject)
+	{
+		// When an object loses a life they get 5 seconds of GOD MODE, until they can again lose lives
+		if (!worldObject->bCanLoseLives)
+		{
+			worldObject->fGodModeTime += fElapsedTime;
+			if (worldObject->fGodModeTime > 5.0f)
+			{
+				worldObject->fGodModeTime = 0.0f;
+				worldObject->bCanLoseLives = true;
+
+			}
+		}
+
+
+	}
+
+	// Handles the object when all lives are lost
+	void HandleAllLivesLost(sWorldObject* worldObject, bool bReset)
+	{
+		// For reset we simply reset all the objects to thier default values
+
+		if (!worldObject->bCanLoseLives) return; // They are in god mode
+		if (worldObject->bIsDead || worldObject->nLives < 1 || bReset)
+		{
+			switch (worldObject->eObjecttype)
+			{
+			case HotAirBalloon::PlayerObject:
+				worldObject->bIsDead = false;
+				worldObject->bEnabled = true;
+				worldObject->nLives = worldObject->nDefaultLives;
+				break;
+
+			case HotAirBalloon::HeroObject:
+			case HotAirBalloon::EnemiesObject:
+				// Special case we only reset enemies if the game is been rest. i.e the player isDead
+				if (bReset && worldObject->bIsDead)
+				{
+					worldObject->bIsDead = false;
+					worldObject->bEnabled = false;
+					worldObject->nLives = worldObject->nDefaultLives;
+				}
+				break;
+
+			case HotAirBalloon::BombObject:
+				//TODO we need to remove it from the vector
+				break;
+
+			default:
+				break;
+			}
 		}
 	}
 
@@ -1995,30 +2049,43 @@ public:
 
 
 		// Draw our balloon
-		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
+		if (!objectPlayer.bCanLoseLives)
+		{
+			// God mode
+			objectPlayer.fTottleTime += fElapsedTime;
+			if (objectPlayer.fTottleTime > objectPlayer.fFlashTime)
+			{
+				objectPlayer.fTottleTime = 0.0f;
+				objectPlayer.bShowHide = !objectPlayer.bShowHide;
+			}
+		}
 
-		
+		if(objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
+			tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
+
+
 		HandleBorders(&objectPlayer);
-		HandleWorldObjectLives(&objectPlayer);
-		ResetCanLoseLives(fElapsedTime, &objectPlayer);
+		bool bReset = objectPlayer.bIsDead; // if the player is dead it is time to reset
+		HandleAllLivesLost(&objectPlayer, bReset);
+		HandleGodMode(fElapsedTime, &objectPlayer);
 
 		for (auto& heroObject : vecObjectHeros)
 		{
 			HandleBorders(&heroObject);
-			HandleWorldObjectLives(&heroObject);
+			HandleAllLivesLost(&heroObject, bReset);
 			DrawWorldObjects(fElapsedTime, &heroObject, true);
 			HandleObjectCollison(&heroObject, &objectPlayer, true);
-			ResetCanLoseLives(fElapsedTime, &heroObject);
+			HandleGodMode(fElapsedTime, &heroObject);
 
 		}
 
 		for (auto& enemiesObject : vecObjectEnemies)
 		{
 			HandleBorders(&enemiesObject);
-			HandleWorldObjectLives(&enemiesObject);
+			HandleAllLivesLost(&enemiesObject, bReset);
 			DrawWorldObjects(fElapsedTime, &enemiesObject, true);
 			HandleObjectCollison(&enemiesObject, &objectPlayer, true);
-			ResetCanLoseLives(fElapsedTime, &enemiesObject);
+			HandleGodMode(fElapsedTime, &enemiesObject);
 
 		}
 
@@ -2028,59 +2095,7 @@ public:
 
 	}
 
-	float fLifeTime;
-	// Reset Can Lose Lives
-	void ResetCanLoseLives(float fElapsedTime, sWorldObject* worldObject)
-	{
-		// When an object loses a life they get 5 seconds of GOD MODE, until they can again lose lives
-		if (!worldObject->bCanLoseLives)
-		{
-			worldObject->fGodModeTime += fElapsedTime;
-			if (worldObject->fGodModeTime > 5.0f)
-			{
-				worldObject->fGodModeTime = 0.0f;
-				worldObject->bCanLoseLives = true;
 
-			}
-		}
-
-
-	}
-
-	void HandleWorldObjectLives(sWorldObject* worldObject)
-	{
-		if (!worldObject->bCanLoseLives) return; // They are in god mode
-		if (worldObject->bIsDead || worldObject->nLives < 1)
-		{
-			switch (worldObject->eObjecttype)
-			{
-				case HotAirBalloon::PlayerObject:
-					worldObject->bIsDead = false;
-					worldObject->bEnabled = true;
-					worldObject->nLives = worldObject->nDefaultLives;
-					break;
-
-				case HotAirBalloon::EnemiesObject:
-					worldObject->bIsDead = false;
-					worldObject->bEnabled = false;
-					worldObject->nLives = worldObject->nDefaultLives;
-					break;
-
-				case HotAirBalloon::HeroObject:
-					worldObject->bIsDead = false;
-					worldObject->bEnabled = false;
-					worldObject->nLives = worldObject->nDefaultLives;
-					break;
-
-				case HotAirBalloon::BombObject:
-					//TODO we need to remove it from the vector
-					break;
-
-			default:
-				break;
-			}
-		}
-	}
 
 	// Game Save
 private:
