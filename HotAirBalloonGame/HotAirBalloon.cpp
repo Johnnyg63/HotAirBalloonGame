@@ -30,7 +30,7 @@ public:
 	std::vector<std::string> vecMessages;	// Hold messages to be displayed
 	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes; // Holds the C64 colour code by key, value
 	std::vector<std::pair<char, olc::Pixel>> vecC64PixelColourCodes; // Holds the C64 Pixel colour code by key, value
-	
+
 
 	/* Sprites */
 	olc::Sprite* sprBalloon;
@@ -48,7 +48,7 @@ public:
 
 	olc::Sprite* sprColourBalloonRight;
 	olc::Decal* decColourBalloonRight;
-	
+
 	olc::Sprite* sprColourBalloonLeft;
 	olc::Decal* decColourBalloonLeft;
 
@@ -99,8 +99,8 @@ public:
 		olc::Pixel LightBlue = { 136, 126, 203, 255 };	// - #887ecb
 		olc::Pixel Blue = { 80, 69, 155, 255 };			// - #887ecb
 		olc::Pixel Purple = { 160, 87, 163, 255 };		// - #a057a3
-		
-		
+
+
 	};
 
 	C64Colors C64Color; // C64 colour palette
@@ -150,6 +150,7 @@ public:
 	};
 	C64FileTileKeys C64FileTileKey;
 
+	
 
 	/* Game Vars */
 	bool bGameLoaded = false;
@@ -222,7 +223,7 @@ private:
 		vecC64PixelColourCodes.push_back({ 'E', C64Color.Blue });
 		vecC64PixelColourCodes.push_back({ 'F', C64Color.Purple });
 
-		
+
 
 	}
 
@@ -383,7 +384,7 @@ private:
 
 	void C64CreateColourBalloonSpriteUP()
 	{
-		
+
 		sprColourBalloonUp = new olc::Sprite(24, 20);
 
 		std::string sBalloonMap =
@@ -653,6 +654,9 @@ private:
 		objectRick.fRadius = 1.0f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
+		objectRick.nDefaultLives = 3;
+		objectRick.nLives = 3;
+		objectRick.eObjecttype = HeroObject;
 		objectRick.pDecal = decRickSpriteSheet;
 		objectRick.vCenterPos = { 4.0f, 4.0f };
 		objectRick.vPos = { 3.0f, 3.0f };
@@ -673,6 +677,7 @@ private:
 
 		// Microsoft
 		objectMSBanner.fID = 200.0f;
+		objectMSBanner.eObjecttype = HeroObject;
 		objectMSBanner.fVelX = 0.0f;
 		objectMSBanner.fVelY = 0.0f;
 		objectMSBanner.bCanMove = false;
@@ -694,6 +699,7 @@ private:
 		objectC64Banner.fID = 300.0f;
 		objectC64Banner.fVelX = 0.0f;
 		objectC64Banner.fVelY = 0.0f;
+		objectC64Banner.eObjecttype = HeroObject;
 		objectC64Banner.bCanMove = false;
 		objectC64Banner.fRadius = 3.0f;
 		objectC64Banner.nRunCurrentFrame = 0;
@@ -713,6 +719,7 @@ private:
 		objectC64Logo.fID = 400.0f;
 		objectC64Logo.fVelX = 0.3f;
 		objectC64Logo.fVelY = 0.0f;
+		objectC64Logo.eObjecttype = HeroObject;
 		objectC64Logo.fRadius = 0.5f;
 		objectC64Logo.nRunCurrentFrame = 0;
 		objectC64Logo.nRunFrames = 360;
@@ -732,6 +739,9 @@ private:
 		// Egyptian		
 		objectEgyptian.fID = 500.0f;
 		objectEgyptian.fRadius = 1.0f;
+		objectEgyptian.eObjecttype = EnemiesObject;
+		objectEgyptian.nDefaultLives = 3;
+		objectEgyptian.nLives = 1;
 		objectEgyptian.nRunCurrentFrame = 0;
 		objectEgyptian.nRunFrames = 3;
 		objectEgyptian.pDecal = decEnemiesSpriteSheeta;
@@ -749,10 +759,13 @@ private:
 		objectEgyptian.vVel = { 0.0f, 0.2f };
 		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies1;
 
-		
+
 		// Soldier
 		objectSoldier.fID = 600.0f;
 		objectSoldier.fRadius = 1.0f;
+		objectSoldier.eObjecttype = EnemiesObject;
+		objectSoldier.nDefaultLives = 1;
+		objectSoldier.nLives = 1;
 		objectSoldier.nRunCurrentFrame = 0;
 		objectSoldier.nRunFrames = 3;
 		objectSoldier.pDecal = decEnemiesSpriteSheeta;
@@ -775,6 +788,9 @@ private:
 		// warrior
 		objectWarrior.fID = 700.0f;
 		objectWarrior.fRadius = 1.0f;
+		objectWarrior.eObjecttype = EnemiesObject;
+		objectWarrior.nDefaultLives = 1;
+		objectWarrior.nLives = 1;
 		objectWarrior.nRunCurrentFrame = 0;
 		objectWarrior.nRunFrames = 3;
 		objectWarrior.pDecal = decEnemiesSpriteSheeta;
@@ -796,6 +812,9 @@ private:
 		objectFootSoldier.fID = 800.0f;
 		objectFootSoldier.bIsForeGround = false;
 		objectFootSoldier.fRadius = 1.0f;
+		objectFootSoldier.eObjecttype = EnemiesObject;
+		objectFootSoldier.nDefaultLives = 2;
+		objectFootSoldier.nLives = 2;
 		objectFootSoldier.nRunCurrentFrame = 0;
 		objectFootSoldier.nRunFrames = 3;
 		objectFootSoldier.pDecal = decEnemiesSpriteSheetb;
@@ -816,6 +835,9 @@ private:
 		// officer
 		objectOfficer.fID = 900.0f;
 		objectOfficer.fRadius = 1.0f;
+		objectOfficer.eObjecttype = EnemiesObject;
+		objectOfficer.nDefaultLives = 3;
+		objectOfficer.nLives = 3;
 		objectOfficer.nRunCurrentFrame = 0;
 		objectOfficer.nRunFrames = 3;
 		objectOfficer.pDecal = decEnemiesSpriteSheetb;
@@ -836,6 +858,9 @@ private:
 		objectMummy.fID = 1000.0f;
 		objectMummy.bIsForeGround = true;
 		objectMummy.fRadius = 1.0f;
+		objectMummy.eObjecttype = EnemiesObject;
+		objectMummy.nDefaultLives = 2;
+		objectMummy.nLives = 2;
 		objectMummy.nRunCurrentFrame = 0;
 		objectMummy.nRunFrames = 3;
 		objectMummy.pDecal = decEnemiesSpriteSheetb;
@@ -852,7 +877,27 @@ private:
 
 		objectMummy.vVel = { 0.0f, 0.2f };
 		objectMummy.C64FileKey = C64FileTileKey.SetEnemies6;
+
+
+		// And finally
+		objectPlayer.fID = 1.0f;
+		objectPlayer.bCanMove = true;
+		objectPlayer.bEnabled = true;
+		objectPlayer.bVelChanged = true;
+		objectPlayer.bIsDead = false;
+		objectPlayer.eObjecttype = PlayerObject;
+		objectPlayer.fRadius = 1.25f;
+		objectPlayer.fStartIndex = 771;
+		objectPlayer.pDecal = decColourBalloon;
+		objectPlayer.nDefaultLives = 5;
+		objectPlayer.nLives = 5;
+		objectPlayer.vPos = { 3.0f, 3.0f };
+		objectPlayer.vCenterPos = { 4.0f, 4.0f };
+		objectPlayer.vStartPos = { 2.0, 3.0 };
+		objectPlayer.vEndPos = m_vWorldSize;
 		
+		
+
 	}
 
 	void LoadWorldObjectsIntoMap()
@@ -933,7 +978,7 @@ private:
 				worldObject.fStartIndex = i;
 				vecObjectEnemies.push_back({ worldObject });
 			}
-			
+
 		}
 
 
@@ -944,6 +989,14 @@ public:
 
 	// Transformed view object to make world offsetting simple
 	olc::TileTransformedView tv;
+
+	enum WorldObjectType
+	{
+		PlayerObject,
+		HeroObject,
+		EnemiesObject,
+		BombObject
+	};
 
 	struct sWorldObject
 	{
@@ -963,9 +1016,16 @@ public:
 		bool bRunningRight = false;
 		bool bIsForeGround = true;
 		bool bCanMove = true;
+		bool bIsDead = false;
+		bool bCanLoseLives = true;
 
-		float fRototaion = 0.0f; 
+		int nDefaultLives = 5;
+		int nLives = 1;
+		float fGodModeTime = 0.0f;
+
+		float fRototaion = 0.0f;
 		uint8_t C64FileKey;
+		HotAirBalloon::WorldObjectType eObjecttype = HotAirBalloon::PlayerObject;
 		int nRunCurrentFrame = 0;
 		float fFrameTime = 0.0f;
 		int nRunFrames = 3;
@@ -979,11 +1039,11 @@ public:
 
 		int fStartIndex = 0;
 
-		
+
 	};
 
 	sWorldObject objectPlayer;		// Player Decal Object
-	
+
 	std::vector<sWorldObject> vecObjectHeros;
 	std::vector<sWorldObject> vecObjectEnemies;
 
@@ -999,20 +1059,16 @@ public:
 	sWorldObject objectOfficer;		// Enemies Offier object
 	sWorldObject objectMummy;		// Enemies Mummy object
 
-	
 
-	enum WorldObjectType
-	{
-		HeroObject,
-		EnemiesObject
-	};
+
+
 
 
 	bool bFollowObject = false;
 
 	// Conveninet constants to define tile map world
 	olc::vi2d m_vWorldSize = { 256, 30 }; // 2048 64 cells
-	olc::vi2d m_vTileSize = { 8, 8 };  
+	olc::vi2d m_vTileSize = { 8, 8 };
 
 	// The camera!
 	olc::utils::Camera2D camera;
@@ -1061,6 +1117,7 @@ public:
 		case HotAirBalloon::HeroObject:
 			for (auto& worldObject : vecObjectHeros)
 			{
+				if(worldObject.bIsDead) continue;
 				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
 				{
 					worldObject.vPos = vTile;
@@ -1078,6 +1135,7 @@ public:
 		case HotAirBalloon::EnemiesObject:
 			for (auto& worldObject : vecObjectEnemies)
 			{
+				if (worldObject.bIsDead) continue;
 				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
 				{
 					worldObject.vPos = vTile;
@@ -1092,10 +1150,15 @@ public:
 				}
 			}
 			break;
+		case HotAirBalloon::BombObject:
+		{
+			//tba
+			break;
+		}
 		default:
 			break;
 		}
-		
+
 	}
 
 
@@ -1103,7 +1166,7 @@ public:
 	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject, bool bIsForeGround)
 	{
 
-		if (!worldObject->bEnabled) return;
+		if (!worldObject->bEnabled || worldObject->bIsDead) return;
 		if (bIsForeGround != worldObject->bIsForeGround) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
@@ -1186,7 +1249,7 @@ public:
 		if (!bIsPlayer)
 		{
 			if (!worldObject->bEnabled || !worldObject->bVelChanged) return;
-			
+
 		}
 		olc::vf2d vNearestPoint;
 		vNearestPoint.x = std::max(float(vTile->x), std::min(worldObject->vPotentialPosition.x, float(vTile->x + 1)));
@@ -1224,21 +1287,127 @@ public:
 
 				}
 			}
-			
-			
+
+
 		}
 
 		// Set the objects new position to the allowed potential position
 		worldObject->vPos = worldObject->vPotentialPosition;
-		if(bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
-		
+		if (bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
+
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
 		{
 			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
 		}
 
-		
+
+
+	}
+
+	
+	// Handles if a object has hit another object
+	void HandleObjectCollison(sWorldObject* testObject1, sWorldObject* worldObject, bool bIsPlayer)
+	{
+
+		if (!testObject1->bEnabled || testObject1->bIsDead || !worldObject->bEnabled || worldObject->bIsDead) return;
+
+		olc::vi2d vTile;
+		vTile.x = (int)testObject1->vPos.x;
+		vTile.y = (int)testObject1->vPos.y;
+
+		olc::vf2d vNearestPoint;
+		vNearestPoint.x = std::max(float(vTile.x), std::min(worldObject->vPotentialPosition.x, float(vTile.x + 1)));
+		vNearestPoint.y = std::max(float(vTile.y), std::min(worldObject->vPotentialPosition.y, float(vTile.y + 1)));
+
+		olc::vf2d vRayToNearest = vNearestPoint - worldObject->vPotentialPosition;
+		float fOverlap = worldObject->fRadius - vRayToNearest.mag();
+		if (std::isnan(worldObject->vPotentialPosition.x))
+		{
+			// ok we are stuck or dead
+			if (!bIsPlayer)
+			{
+				worldObject->bIsDead = true; // Player never dies
+				worldObject->bEnabled = false;
+			}
+			worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+			worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+
+		}
+		if (std::isnan(fOverlap))
+		{
+			fOverlap = 0;
+		}
+
+
+		// If overlap is positive, then a collision has occurred, so we displace backwards by the 
+		// overlap amount. The potential position is then tested against other tiles in the area
+		// therefore "statically" resolving the collision
+		if (fOverlap > 0)
+		{
+			// Statically resolve the collision
+			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
+
+			if (bIsPlayer)
+			{
+				// lets check did we hit a bomb or another enemies
+				if (testObject1->eObjecttype == HeroObject)
+				{
+					// the hero is fine to touch
+					// TODO:
+					int test = 0;
+					test++;
+				}
+				else
+				{
+					// Only execute if the object can lose lives
+					if (worldObject->bCanLoseLives)
+					{
+						worldObject->nLives--;
+
+						if (worldObject->nLives < 1)
+						{
+							worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+							worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+							worldObject->nLives == 5;
+
+						}
+						worldObject->bCanLoseLives = false;
+					}
+
+				}
+
+			}
+			else
+			{
+				if (worldObject->bCanLoseLives)
+				{
+					worldObject->nLives--;
+					if (worldObject->nLives < 1)
+					{
+						// we we are dead folks
+						worldObject->bIsDead = true;
+						worldObject->bEnabled = false;
+					}
+					worldObject->bCanLoseLives = false;
+				}
+
+			}
+
+
+		}
+
+		// Set the objects new position to the allowed potential position
+		worldObject->vPos = worldObject->vPotentialPosition;
+		if (bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
+
+		// Draw Velocity
+		if (worldObject->vVel.mag2() > 0)
+		{
+			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
+		}
+
+
 
 	}
 
@@ -1276,7 +1445,7 @@ public:
 			if (bShowGridHero) vWorldMapHero[idx] = C64FileTileKey.Blank; //vWorldMapHero_undo[idx];
 			if (bShowGridEnemies) vWorldMapEnemies[idx] = C64FileTileKey.Blank; //vWorldMapEnemies_undo[idx];
 			if (bShowGridObjects) vWorldMapObjects[idx] = C64FileTileKey.Blank; // vWorldMapObjects_undo[idx];
-			
+
 		}
 
 
@@ -1347,6 +1516,42 @@ public:
 
 	}
 
+	// Handle borders
+	void HandleBorders(sWorldObject* worldObject)
+	{
+
+
+		if (worldObject->vPos.x < 0.00f ||
+			worldObject->vPos.x < worldObject->vStartPos.x ||
+			worldObject->vPos.x < tv.GetTopLeftTile().x)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+			worldObject->bVelChanged = false;
+		}
+		if (worldObject->vPos.x > m_vWorldSize.x ||
+			worldObject->vPos.x > worldObject->vEndPos.x ||
+			worldObject->vPos.x > tv.GetBottomRightTile().x)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+
+		}
+
+		if (worldObject->vPos.y < 0.01f)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+
+		}
+
+		if (worldObject->vPos.y > m_vWorldSize.y)
+		{
+			worldObject->bEnabled = false;
+			worldObject->bVelChanged = false;
+
+		}
+	}
 
 	// Handle the Game graphics
 	void HandleGraphics(float fElapsedTime)
@@ -1402,7 +1607,7 @@ public:
 				}
 
 			}
-			
+
 		}
 		//vecObjectEnemies
 		for (auto& worldObject : vecObjectEnemies)
@@ -1424,7 +1629,7 @@ public:
 					worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
 					worldObject.bVelChanged = true;
 				}
-				
+
 			}
 
 		}
@@ -1458,7 +1663,7 @@ public:
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
 					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
-					
+
 
 					if (bShowGrid && bShowGridPlayer)
 					{
@@ -1472,7 +1677,7 @@ public:
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
 				{
 					EnableWorldObject(vTile, WorldObjectType::HeroObject, true, idx, vWorldMapObjects[idx]);
-					
+
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Yellow);
@@ -1521,7 +1726,7 @@ public:
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies1)
 				{
 					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, true, idx, vWorldMapObjects[idx]);
-										
+
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightRed);
@@ -1534,7 +1739,7 @@ public:
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetEnemies2)
 				{
 					EnableWorldObject(vTile, WorldObjectType::EnemiesObject, false, idx, vWorldMapObjects[idx]);
-					
+
 					if (bShowGrid && bShowGridObjects)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
@@ -1619,7 +1824,7 @@ public:
 					{
 						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
 					}
-					
+
 					if (bShowGrid && bShowGridEnemies)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.LightBlue);
@@ -1792,175 +1997,206 @@ public:
 		// Draw our balloon
 		tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
-		for (auto& worldObject : vecObjectHeros)
+		
+		HandleBorders(&objectPlayer);
+		HandleWorldObjectLives(&objectPlayer);
+		ResetCanLoseLives(fElapsedTime, &objectPlayer);
+
+		for (auto& heroObject : vecObjectHeros)
 		{
-			HandleBorders(&worldObject);
-			DrawWorldObjects(fElapsedTime, &worldObject, true);
+			HandleBorders(&heroObject);
+			HandleWorldObjectLives(&heroObject);
+			DrawWorldObjects(fElapsedTime, &heroObject, true);
+			HandleObjectCollison(&heroObject, &objectPlayer, true);
+			ResetCanLoseLives(fElapsedTime, &heroObject);
+
 		}
 
-		for (auto& worldObject : vecObjectEnemies)
+		for (auto& enemiesObject : vecObjectEnemies)
 		{
-			HandleBorders(&worldObject);
-			DrawWorldObjects(fElapsedTime, &worldObject, true);
+			HandleBorders(&enemiesObject);
+			HandleWorldObjectLives(&enemiesObject);
+			DrawWorldObjects(fElapsedTime, &enemiesObject, true);
+			HandleObjectCollison(&enemiesObject, &objectPlayer, true);
+			ResetCanLoseLives(fElapsedTime, &enemiesObject);
+
 		}
-		
-		
+
+
 		HandleInput(fElapsedTime, vTile);
 
 
 	}
 
-	void HandleBorders(sWorldObject* worldObject)
+	float fLifeTime;
+	// Reset Can Lose Lives
+	void ResetCanLoseLives(float fElapsedTime, sWorldObject* worldObject)
 	{
-
-
-		if (worldObject->vPos.x < 0.00f || 
-			worldObject->vPos.x < worldObject->vStartPos.x ||
-			worldObject->vPos.x < tv.GetTopLeftTile().x)
+		// When an object loses a life they get 5 seconds of GOD MODE, until they can again lose lives
+		if (!worldObject->bCanLoseLives)
 		{
-			worldObject->bEnabled = false;
-			worldObject->bVelChanged = false;
-			worldObject->bVelChanged = false;
-		}
-		if (worldObject->vPos.x > m_vWorldSize.x || 
-			worldObject->vPos.x > worldObject->vEndPos.x ||
-			worldObject->vPos.x > tv.GetBottomRightTile().x)
-		{
-			worldObject->bEnabled = false;
-			worldObject->bVelChanged = false;
-			
+			worldObject->fGodModeTime += fElapsedTime;
+			if (worldObject->fGodModeTime > 5.0f)
+			{
+				worldObject->fGodModeTime = 0.0f;
+				worldObject->bCanLoseLives = true;
+
+			}
 		}
 
-		if (worldObject->vPos.y < 0.01f)
-		{
-			worldObject->bEnabled = false;
-			worldObject->bVelChanged = false;
-			
-		}
 
-		if (worldObject->vPos.y > m_vWorldSize.y)
+	}
+
+	void HandleWorldObjectLives(sWorldObject* worldObject)
+	{
+		if (!worldObject->bCanLoseLives) return; // They are in god mode
+		if (worldObject->bIsDead || worldObject->nLives < 1)
 		{
-			worldObject->bEnabled = false;
-			worldObject->bVelChanged = false;
-			
+			switch (worldObject->eObjecttype)
+			{
+				case HotAirBalloon::PlayerObject:
+					worldObject->bIsDead = false;
+					worldObject->bEnabled = true;
+					worldObject->nLives = worldObject->nDefaultLives;
+					break;
+
+				case HotAirBalloon::EnemiesObject:
+					worldObject->bIsDead = false;
+					worldObject->bEnabled = false;
+					worldObject->nLives = worldObject->nDefaultLives;
+					break;
+
+				case HotAirBalloon::HeroObject:
+					worldObject->bIsDead = false;
+					worldObject->bEnabled = false;
+					worldObject->nLives = worldObject->nDefaultLives;
+					break;
+
+				case HotAirBalloon::BombObject:
+					//TODO we need to remove it from the vector
+					break;
+
+			default:
+				break;
+			}
 		}
 	}
 
 	// Game Save
-	private:
+private:
 
-		void LoadMap(std::string sFilename)
+	void LoadMap(std::string sFilename)
+	{
+		std::ifstream file(sFilename, std::ios::in | std::ios::binary);
+
+		if (file.is_open())
 		{
-			std::ifstream file(sFilename, std::ios::in | std::ios::binary);
+			file.read((char*)&m_vWorldSize, sizeof(olc::vi2d));
+			file.read((char*)&m_vTileSize, sizeof(olc::vi2d));
 
-			if (file.is_open())
+			// Graphics World
+			for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 			{
-				file.read((char*)&m_vWorldSize, sizeof(olc::vi2d));
-				file.read((char*)&m_vTileSize, sizeof(olc::vi2d));
-
-				// Graphics World
-				for (int i = 0; i < vWorldMapPlayerGraphics.size(); i++)
-				{
-					file.read((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
-				}
-
-				for (size_t i = 0; i < vWorldMapPlayerGraphics.size(); i++)
-				{
-					vWorldMapPlayerGraphics_undo[i] = vWorldMapPlayerGraphics[i];
-				}
-
-				// Player World
-				for (int i = 0; i < vWorldMapPlayer.size(); i++)
-				{
-					file.read((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
-				}
-
-				for (size_t i = 0; i < vWorldMapPlayer.size(); i++)
-				{
-					vWorldMapPlayer_undo[i] = vWorldMapPlayer[i];
-				}
-
-				// Hero World
-				for (int i = 0; i < vWorldMapHero.size(); i++)
-				{
-					file.read((char*)&vWorldMapHero[i], sizeof(uint8_t));
-				}
-
-				for (size_t i = 0; i < vWorldMapHero.size(); i++)
-				{
-					vWorldMapHero_undo[i] = vWorldMapHero[i];
-				}
-
-				// Enemies World
-				for (int i = 0; i < vWorldMapEnemies.size(); i++)
-				{
-					file.read((char*)&vWorldMapEnemies[i], sizeof(uint8_t));
-				}
-
-				for (size_t i = 0; i < vWorldMapEnemies.size(); i++)
-				{
-					vWorldMapEnemies_undo[i] = vWorldMapEnemies[i];
-				}
-
-				for (int i = 0; i < vWorldMapObjects.size(); i++)
-				{
-					file.read((char*)&vWorldMapObjects[i], sizeof(uint8_t));
-				}
-
-				for (size_t i = 0; i < vWorldMapObjects.size(); i++)
-				{
-					vWorldMapObjects[i] = vWorldMapObjects[i];
-				}
-
-				file.close();
-
-
+				file.read((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
 			}
 
-
-
-			
-		}
-
-		void SaveMap(std::string sFilename)
-		{
-			std::ofstream file(sFilename, std::ios::out | std::ios::binary);
-			file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
-			file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
-
-			// Graphic world
 			for (size_t i = 0; i < vWorldMapPlayerGraphics.size(); i++)
 			{
-				file.write((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
+				vWorldMapPlayerGraphics_undo[i] = vWorldMapPlayerGraphics[i];
 			}
 
-			// Player world
+			// Player World
+			for (int i = 0; i < vWorldMapPlayer.size(); i++)
+			{
+				file.read((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
+			}
+
 			for (size_t i = 0; i < vWorldMapPlayer.size(); i++)
 			{
-				file.write((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
+				vWorldMapPlayer_undo[i] = vWorldMapPlayer[i];
 			}
 
-			// Hero world
+			// Hero World
+			for (int i = 0; i < vWorldMapHero.size(); i++)
+			{
+				file.read((char*)&vWorldMapHero[i], sizeof(uint8_t));
+			}
+
 			for (size_t i = 0; i < vWorldMapHero.size(); i++)
 			{
-				file.write((char*)&vWorldMapHero[i], sizeof(uint8_t));
+				vWorldMapHero_undo[i] = vWorldMapHero[i];
 			}
-
 
 			// Enemies World
-			for (size_t i = 0; i < vWorldMapEnemies.size(); i++)
+			for (int i = 0; i < vWorldMapEnemies.size(); i++)
 			{
-				file.write((char*)&vWorldMapEnemies[i], sizeof(uint8_t));
+				file.read((char*)&vWorldMapEnemies[i], sizeof(uint8_t));
 			}
 
-			// Objects World
+			for (size_t i = 0; i < vWorldMapEnemies.size(); i++)
+			{
+				vWorldMapEnemies_undo[i] = vWorldMapEnemies[i];
+			}
+
+			for (int i = 0; i < vWorldMapObjects.size(); i++)
+			{
+				file.read((char*)&vWorldMapObjects[i], sizeof(uint8_t));
+			}
+
 			for (size_t i = 0; i < vWorldMapObjects.size(); i++)
 			{
-				file.write((char*)&vWorldMapObjects[i], sizeof(uint8_t));
+				vWorldMapObjects[i] = vWorldMapObjects[i];
 			}
 
 			file.close();
+
+
 		}
+
+
+
+
+	}
+
+	void SaveMap(std::string sFilename)
+	{
+		std::ofstream file(sFilename, std::ios::out | std::ios::binary);
+		file.write((char*)&m_vWorldSize.x, sizeof(olc::vi2d));
+		file.write((char*)&m_vTileSize, sizeof(olc::vi2d));
+
+		// Graphic world
+		for (size_t i = 0; i < vWorldMapPlayerGraphics.size(); i++)
+		{
+			file.write((char*)&vWorldMapPlayerGraphics[i], sizeof(uint8_t));
+		}
+
+		// Player world
+		for (size_t i = 0; i < vWorldMapPlayer.size(); i++)
+		{
+			file.write((char*)&vWorldMapPlayer[i], sizeof(uint8_t));
+		}
+
+		// Hero world
+		for (size_t i = 0; i < vWorldMapHero.size(); i++)
+		{
+			file.write((char*)&vWorldMapHero[i], sizeof(uint8_t));
+		}
+
+
+		// Enemies World
+		for (size_t i = 0; i < vWorldMapEnemies.size(); i++)
+		{
+			file.write((char*)&vWorldMapEnemies[i], sizeof(uint8_t));
+		}
+
+		// Objects World
+		for (size_t i = 0; i < vWorldMapObjects.size(); i++)
+		{
+			file.write((char*)&vWorldMapObjects[i], sizeof(uint8_t));
+		}
+
+		file.close();
+	}
 
 public:
 	bool OnUserCreate() override
@@ -2028,11 +2264,6 @@ public:
 		// Load the world object
 		LoadWorldObjectsIntoMap();
 
-		// Set the player start position
-		objectPlayer.vPos = { 3.0f, 3.0f };
-		objectPlayer.vCenterPos = { 4.0f, 4.0f };
-		objectPlayer.pDecal = decColourBalloon;
-
 		// Set background colour
 		Clear(C64Color.Blue);
 
@@ -2043,12 +2274,12 @@ public:
 	{
 		// Called once per frame, draws random coloured pixels
 		SetDrawTarget(nullptr);
-		
+
 		if (GetKey(olc::SPACE).bPressed) bGameLoaded = true; // TODO: remove
 
 		//if (!bStartRec) return true;
 
-		
+
 		if (!bGameLoaded)
 		{
 			FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.LightBlue);
@@ -2056,7 +2287,7 @@ public:
 			if (bGameLoading) C64LoadingScreen();
 			C64DisplayScreen();
 			C64DisplayHeader(fElapsedTime);
-			
+
 			return true;
 		}
 
