@@ -1047,8 +1047,9 @@ public:
 
 	sWorldObject objectPlayer;		// Player Decal Object
 
-	std::vector<sWorldObject> vecObjectHeros;
-	std::vector<sWorldObject> vecObjectEnemies;
+	std::vector<sWorldObject> vecObjectHeros;	// Hero Objects
+	std::vector<sWorldObject> vecObjectEnemies;	// Enemies Objects
+	std::vector<sWorldObject> vecObjectBombs;	// Bombs Objects
 
 	sWorldObject objectRick;
 	sWorldObject objectC64Banner;
@@ -1061,6 +1062,9 @@ public:
 	sWorldObject objectFootSoldier;	// Enemies Foot Soldier object
 	sWorldObject objectOfficer;		// Enemies Offier object
 	sWorldObject objectMummy;		// Enemies Mummy object
+
+	sWorldObject objectBomb;		// Bomb object
+	sWorldObject objectExplosion;	// Explosion object
 
 
 
