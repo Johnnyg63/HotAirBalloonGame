@@ -664,6 +664,7 @@ private:
 		objectRick.fFrameChangeTime = 0.05f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
+		objectRick.bCanLoseLives = true;
 		objectRick.nDefaultLives = 3;
 		objectRick.nLives = 3;
 		objectRick.eObjecttype = HeroObject;
@@ -922,7 +923,7 @@ private:
 		// Explosion
 		objectExplosion.fID = 1200.0f;
 		objectExplosion.fVelX = 0.5f;
-		objectExplosion.fRadius = 1.0f;
+		objectExplosion.fRadius = 1.5f;
 		objectExplosion.nRunCurrentFrame = 0;
 		objectExplosion.nRunFrames = 4;
 		objectExplosion.nDefaultLives = 1;
@@ -1298,7 +1299,7 @@ public:
 			worldObject->nRunCurrentFrame += 1;
 			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size())
 			{
-				if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject)
+				if (worldObject->eObjecttype == BombObject) // || worldObject->eObjecttype == ExplosionObject)  //
 				{
 					// ok lets kill it
 					worldObject->bIsDead = true;
@@ -1355,7 +1356,7 @@ public:
 		// Explosion Object
 		if (worldObject->eObjecttype == ExplosionObject)
 		{
-			if (!worldObject->bIsDead) tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			if (!worldObject->bIsDead) tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.1f, 0.3f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			return;
 		}
 
@@ -2041,9 +2042,6 @@ public:
 
 		}
 
-
-
-
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
 
@@ -2490,6 +2488,18 @@ public:
 			HandleAllLivesLost(&explosionObject, bReset);
 			DrawWorldObjects(fElapsedTime, &explosionObject, true);
 			//HandleObjectCollison(&explosionObject, &objectPlayer, true);
+			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
+			{
+				HandleObjectCollison(&heroObject, &explosionObject, true);  //handles enemies v hero
+				HandleGodMode(fElapsedTime, &heroObject);
+
+			}
+			for (auto& enemiesObject : vecObjectEnemies)
+			{
+				HandleObjectCollison(&enemiesObject, &explosionObject, true);  //handles enemies v hero
+				HandleGodMode(fElapsedTime, &enemiesObject);
+			}
+
 			HandleGodMode(fElapsedTime, &explosionObject);
 
 		}
