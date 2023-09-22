@@ -665,8 +665,8 @@ private:
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
 		objectRick.bCanLoseLives = true;
-		objectRick.nDefaultLives = 3;
-		objectRick.nLives = 3;
+		objectRick.nDefaultLives = 5;
+		objectRick.nLives = 5;
 		objectRick.eObjecttype = HeroObject;
 		objectRick.pDecal = decRickSpriteSheet;
 		objectRick.vCenterPos = { 4.0f, 4.0f };
@@ -1299,7 +1299,7 @@ public:
 			worldObject->nRunCurrentFrame += 1;
 			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size())
 			{
-				if (worldObject->eObjecttype == BombObject) // || worldObject->eObjecttype == ExplosionObject)  //
+				if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) // )  //
 				{
 					// ok lets kill it
 					worldObject->bIsDead = true;
@@ -1565,69 +1565,116 @@ public:
 			switch (testObject1->eObjecttype)
 			{
 			case ExplosionObject:
+			{
 				// Rule 4 everyone loses a life
 				if (worldObject->bCanLoseLives)
 				{
 					worldObject->nLives--; // we lose a life
-					worldObject->bCanLoseLives = false;
-				}
-				break;
+					if (worldObject->nLives < 0)
+					{
+						worldObject->bIsDead = true;
 
+					}
+					else
+					{
+						worldObject->bCanLoseLives = false;
+					}
+
+				}
+				return;
+				break;
+			}
 			case PlayerObject:
 			case HeroObject:
+			{
 				switch (worldObject->eObjecttype)
 				{
 				case HeroObject:
 				case PlayerObject:
+				{
 					// rule 1
 					// Nothiong to do here they can touch
 					break;
+				}
+					
 				case BombObject:
+				{
 					// rule 2 change direction
 					worldObject->bRunningRight = testObject1->bRunningRight;
 					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
-					break;
-				case EnemiesObject:
-				case ExplosionObject:
-					// Rule 3
-					if (worldObject->bCanLoseLives)
-					{
-						worldObject->nLives--; // we lose a life
-						worldObject->bCanLoseLives = false;
-					}
-					break;
-				default:
 					break;
 				}
-
-				break;
-
-
-			case EnemiesObject:
-				switch (worldObject->eObjecttype)
-				{
-				case HeroObject:
-				case PlayerObject:
-					// Rule 3
-					if (worldObject->bCanLoseLives)
-					{
-						worldObject->nLives--; // we lose a life
-						worldObject->bCanLoseLives = false;
-					}
-					break;
-				case BombObject:
-					// rule 2 change direction
-					worldObject->bRunningRight = testObject1->bRunningRight;
-					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
-					break;
+					
+				case EnemiesObject:
 				case ExplosionObject:
+				{
 					// Rule 3
 					if (testObject1->bCanLoseLives)
 					{
 						testObject1->nLives--; // we lose a life
-						testObject1->bCanLoseLives = false;
+						if (testObject1->nLives < 0)
+						{
+							testObject1->bIsDead = true;
+
+						}
+						else
+						{
+							testObject1->bCanLoseLives = false;
+						}
+
 					}
 					break;
+				}
+				default:
+					break;
+				}
+
+				break;
+			}
+
+			case EnemiesObject:
+			{
+				switch (worldObject->eObjecttype)
+				{
+				case HeroObject:
+				case PlayerObject:
+				{
+					// Rule 3
+					if (worldObject->bCanLoseLives)
+					{
+						worldObject->nLives--; // we lose a life
+						worldObject->bCanLoseLives = false;
+					}
+					break;
+				}
+					
+				case BombObject:
+				{
+					// rule 2 change direction
+					worldObject->bRunningRight = testObject1->bRunningRight;
+					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
+					break;
+				}
+					
+				case ExplosionObject:
+				{
+					// Rule 3
+					if (testObject1->bCanLoseLives)
+					{
+						testObject1->nLives--; // we lose a life
+						if (testObject1->nLives < 0)
+						{
+							testObject1->bIsDead = true;
+
+						}
+						else
+						{
+							testObject1->bCanLoseLives = false;
+						}
+
+					}
+					break;
+				}
 				case EnemiesObject:
 					break;
 				default:
@@ -1635,6 +1682,8 @@ public:
 				}
 
 				break;
+			}
+				
 			case BombObject:
 				// it does nothing the other object will move it around
 				break;
@@ -1642,27 +1691,7 @@ public:
 				break;
 			}
 
-			// finaly lets check who is dead
-			if (testObject1->nLives < 1)
-			{
-				testObject1->vPotentialPosition.x = testObject1->vStartPos.x;
-				testObject1->vPotentialPosition.y = testObject1->vStartPos.y;
-				testObject1->bEnabled = false;
-				testObject1->bIsDead = true;
-
-			}
-
-			if (worldObject->nLives < 1)
-			{
-				worldObject->vPotentialPosition.x = worldObject->vStartPos.x;
-				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
-				worldObject->bEnabled = false;
-				worldObject->bIsDead = true;
-
-			}
-
-
-
+			
 		}
 
 		// Set the objects new position to the allowed potential position
@@ -1870,12 +1899,17 @@ public:
 	}
 
 	// Handles the object when all lives are lost
-	void HandleAllLivesLost(sWorldObject* worldObject, bool bReset)
+	void HandleAllLivesLost(sWorldObject* worldObject)
 	{
 		// For reset we simply reset all the objects to thier default values
 
+		
+
 		if (!worldObject->bCanLoseLives) return; // They are in god mode
-		if (worldObject->bIsDead || worldObject->nLives < 1 || bReset)
+		
+		if (worldObject->nLives < 0) worldObject->bIsDead = true;
+
+		if (worldObject->bIsDead)
 		{
 			switch (worldObject->eObjecttype)
 			{
@@ -1891,35 +1925,24 @@ public:
 			case HotAirBalloon::EnemiesObject:
 			{
 				// Special case we only reset enemies if the game is been rest. i.e the player isDead
-				if (bReset && worldObject->bIsDead)
-				{
-					worldObject->bIsDead = false;
-					worldObject->bEnabled = false;
-					worldObject->nLives = worldObject->nDefaultLives;
-				}
+				worldObject->bIsDead = false;
+				worldObject->bEnabled = false;
+				
 				break;
 			}
 
 			case HotAirBalloon::BombObject:
 			{
-				if (bReset)
-				{
-					vecObjectBombs.clear();
-				}
 				for (size_t i = 0; i < vecObjectBombs.size(); i++)
 				{
 					if (vecObjectBombs[i].bIsDead) {
-						vecObjectBombs.erase(vecObjectBombs.begin() + i);
+						//vecObjectBombs.erase(vecObjectBombs.begin() + i);
 					}
 				}
 				break;
 			}	
 			case HotAirBalloon::ExplosionObject:
 			{
-				if (bReset)
-				{
-					vecObjectExplosion.clear();
-				}
 				for (size_t i = 0; i < vecObjectExplosion.size(); i++)
 				{
 					if (vecObjectExplosion[i].bIsDead) {
@@ -1934,6 +1957,42 @@ public:
 			default:
 				break;
 			}
+		}
+	}
+
+	void HandleReset(sWorldObject* worldObject = nullptr)
+	{
+		if (worldObject == nullptr)
+		{
+			// Reset everything
+			objectPlayer.bCanLoseLives = false;
+			objectPlayer.bIsDead = false;
+			objectPlayer.nLives = objectPlayer.nDefaultLives;
+
+			// Clear the bombs
+			vecObjectBombs.clear();
+			vecObjectExplosion.clear();
+
+			for (auto& heroObject : vecObjectHeros)
+			{
+				heroObject.bEnabled = false;
+				heroObject.bIsDead = false;
+				heroObject.nLives = heroObject.nDefaultLives;
+			}
+
+			for (auto& enemiesObject : vecObjectEnemies)
+			{
+				enemiesObject.bEnabled = false;
+				enemiesObject.bIsDead = false;
+				enemiesObject.nLives = enemiesObject.nDefaultLives;
+			}
+
+		}
+		else
+		{
+			worldObject->bCanLoseLives = false;
+			worldObject->bIsDead = false;
+			worldObject->nLives = objectPlayer.nDefaultLives;
 		}
 	}
 
@@ -2428,15 +2487,20 @@ public:
 		if (objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
 			tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
+
 		HandleBorders(&objectPlayer);
-		bool bReset = objectPlayer.bIsDead; // if the player is dead it is time to reset
-		HandleAllLivesLost(&objectPlayer, bReset);
+		HandleAllLivesLost(&objectPlayer);
+		// if the player is dead it is time to reset
+		if (objectPlayer.bIsDead)
+		{
+			HandleReset();
+		}
 		HandleGodMode(fElapsedTime, &objectPlayer);
 
 		for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 		{
 			HandleBorders(&heroObject);
-			HandleAllLivesLost(&heroObject, bReset);
+			HandleAllLivesLost(&heroObject);
 			DrawWorldObjects(fElapsedTime, &heroObject, true);
 			HandleObjectCollison(&heroObject, &objectPlayer, true);
 			HandleGodMode(fElapsedTime, &heroObject);
@@ -2446,13 +2510,13 @@ public:
 		for (auto& enemiesObject : vecObjectEnemies)
 		{
 			HandleBorders(&enemiesObject);
-			HandleAllLivesLost(&enemiesObject, bReset);
+			HandleAllLivesLost(&enemiesObject);
 			DrawWorldObjects(fElapsedTime, &enemiesObject, true);
 			HandleObjectCollison(&enemiesObject, &objectPlayer, true); //handles enemies v player
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &enemiesObject, true);  //handles enemies v hero
-				HandleGodMode(fElapsedTime, &heroObject);
+				//HandleGodMode(fElapsedTime, &heroObject);
 
 			}
 
@@ -2464,19 +2528,19 @@ public:
 		for (auto& bombObject : vecObjectBombs)
 		{
 			HandleBorders(&bombObject);
-			HandleAllLivesLost(&bombObject, bReset);
+			HandleAllLivesLost(&bombObject);
 			DrawWorldObjects(fElapsedTime, &bombObject, true);
 			//HandleObjectCollison(&bombObject, &objectPlayer, true);	// bombs do not affect the player
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &bombObject, true);  //handles enemies v hero
-				HandleGodMode(fElapsedTime, &heroObject);
+				//HandleGodMode(fElapsedTime, &heroObject);
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &bombObject, true);  //handles enemies v hero
-				HandleGodMode(fElapsedTime, &enemiesObject);
+				//HandleGodMode(fElapsedTime, &enemiesObject);
 			}
 
 		}
@@ -2485,19 +2549,19 @@ public:
 		for (auto& explosionObject : vecObjectExplosion)
 		{
 			HandleBorders(&explosionObject);
-			HandleAllLivesLost(&explosionObject, bReset);
+			HandleAllLivesLost(&explosionObject);
 			DrawWorldObjects(fElapsedTime, &explosionObject, true);
 			//HandleObjectCollison(&explosionObject, &objectPlayer, true);
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &explosionObject, true);  //handles enemies v hero
-				HandleGodMode(fElapsedTime, &heroObject);
+				//HandleGodMode(fElapsedTime, &heroObject);
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &explosionObject, true);  //handles enemies v hero
-				HandleGodMode(fElapsedTime, &enemiesObject);
+				//HandleGodMode(fElapsedTime, &enemiesObject);
 			}
 
 			HandleGodMode(fElapsedTime, &explosionObject);
