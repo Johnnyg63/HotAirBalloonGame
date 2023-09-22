@@ -1299,10 +1299,26 @@ public:
 			worldObject->nRunCurrentFrame += 1;
 			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size())
 			{
-				if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) // )  //
+				if (worldObject->eObjecttype == BombObject)
 				{
-					// ok lets kill it
+					// ok lets replace with it a explosion
 					worldObject->bIsDead = true;
+					int vPosX = worldObject->vPos.x;
+					int vPosY = worldObject->vPos.y;
+
+					int idx = vPosY * m_vWorldSize.x + vPosX;
+					vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
+					sWorldObject worldObject1 = objectExplosion;
+					worldObject1.fStartIndex = idx;
+					vecObjectExplosion.push_back({ worldObject1 });			
+					
+					return;
+
+				}
+				if (worldObject->eObjecttype == ExplosionObject)
+				{
+					worldObject->bIsDead = true;
+					return;
 				}
 				worldObject->nRunCurrentFrame = 0;
 			}
@@ -1337,19 +1353,7 @@ public:
 		// Bomb Object
 		if (worldObject->eObjecttype == BombObject)
 		{
-			if (worldObject->bIsDead)
-			{
-				// ok we need to inject a Explosion
-				int idx = (int)worldObject->vPos.y * m_vWorldSize.x + (int)worldObject->vPos.x;
-				vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
-				sWorldObject worldObject = objectExplosion;
-				worldObject.fStartIndex = idx;
-				vecObjectExplosion.push_back({ worldObject });
-			}
-			else
-			{
-				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(0.75f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
-			}
+			if (!worldObject->bIsDead) tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(0.75f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			return;
 		}
 
@@ -1847,7 +1851,6 @@ public:
 			worldObject->vPos.x < tv.GetTopLeftTile().x)
 		{
 			worldObject->bEnabled = false;
-			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 			worldObject->bVelChanged = false;
 			worldObject->bVelChanged = false;
 		}
@@ -1857,7 +1860,6 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 
@@ -1865,7 +1867,6 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 
@@ -1873,7 +1874,6 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 	}
@@ -1936,7 +1936,7 @@ public:
 				for (size_t i = 0; i < vecObjectBombs.size(); i++)
 				{
 					if (vecObjectBombs[i].bIsDead) {
-						//vecObjectBombs.erase(vecObjectBombs.begin() + i);
+						vecObjectBombs.erase(vecObjectBombs.begin() + i);
 					}
 				}
 				break;
@@ -2527,20 +2527,19 @@ public:
 
 		for (auto& bombObject : vecObjectBombs)
 		{
-			HandleBorders(&bombObject);
 			HandleAllLivesLost(&bombObject);
 			DrawWorldObjects(fElapsedTime, &bombObject, true);
 			//HandleObjectCollison(&bombObject, &objectPlayer, true);	// bombs do not affect the player
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &bombObject, true);  //handles enemies v hero
-				//HandleGodMode(fElapsedTime, &heroObject);
+				
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &bombObject, true);  //handles enemies v hero
-				//HandleGodMode(fElapsedTime, &enemiesObject);
+				
 			}
 
 		}
@@ -2548,24 +2547,22 @@ public:
 
 		for (auto& explosionObject : vecObjectExplosion)
 		{
-			HandleBorders(&explosionObject);
 			HandleAllLivesLost(&explosionObject);
 			DrawWorldObjects(fElapsedTime, &explosionObject, true);
-			//HandleObjectCollison(&explosionObject, &objectPlayer, true);
+			
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &explosionObject, true);  //handles enemies v hero
-				//HandleGodMode(fElapsedTime, &heroObject);
+				
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &explosionObject, true);  //handles enemies v hero
-				//HandleGodMode(fElapsedTime, &enemiesObject);
+				
 			}
 
-			HandleGodMode(fElapsedTime, &explosionObject);
-
+			
 		}
 
 		// TODO Explosions
