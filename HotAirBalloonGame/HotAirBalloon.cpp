@@ -64,6 +64,9 @@ public:
 	olc::Sprite* sprEnemiesSpriteSheetb;
 	olc::Decal* decEnemiesSpriteSheetb;
 
+	olc::Sprite* sprObjectsSpriteSheet;
+	olc::Decal* decObjectsSpriteSheet;
+
 	olc::Sprite* sprC64Banner;
 	olc::Decal* decC64Banner;
 
@@ -125,6 +128,9 @@ public:
 		uint8_t SetEnemies4 = 195; // Set position for Enemies
 		uint8_t SetEnemies5 = 200; // Set position for Enemies
 		uint8_t SetEnemies6 = 205; // Set position for Enemies
+
+		uint8_t SetBomb1 = 210;		// Set position for bombs
+		uint8_t SetExplosion1 = 215;	// Set position for explosions
 
 
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
@@ -644,6 +650,9 @@ private:
 		sprEnemiesSpriteSheetb = new olc::Sprite("assets/rickenemiesspritesheetb.png");
 		decEnemiesSpriteSheetb = new olc::Decal(sprEnemiesSpriteSheetb);
 
+		sprObjectsSpriteSheet = new olc::Sprite("assets/bitsspritesheeta.png");
+		decObjectsSpriteSheet = new olc::Decal(sprObjectsSpriteSheet);
+
 	}
 
 	void CreateWorldObjects()
@@ -652,6 +661,7 @@ private:
 		objectRick.fID = 100.0f;
 		objectRick.fVelX = 0.5f;
 		objectRick.fRadius = 1.0f;
+		objectRick.fFrameChangeTime = 0.05f;
 		objectRick.nRunCurrentFrame = 0;
 		objectRick.nRunFrames = 3;
 		objectRick.nDefaultLives = 3;
@@ -717,7 +727,7 @@ private:
 
 		// Commodore 64 Logo
 		objectC64Logo.fID = 400.0f;
-		objectC64Logo.fVelX = 0.3f;
+		objectC64Logo.fVelX = 0.9f;
 		objectC64Logo.fVelY = 0.0f;
 		objectC64Logo.eObjecttype = HeroObject;
 		objectC64Logo.fRadius = 0.5f;
@@ -878,6 +888,65 @@ private:
 		objectMummy.vVel = { 0.0f, 0.2f };
 		objectMummy.C64FileKey = C64FileTileKey.SetEnemies6;
 
+		// Bombs
+		objectBomb.fID = 1100.0f;
+		objectBomb.fVelX = 0.2f;
+		objectBomb.fVelY = 0.2f;
+		objectBomb.fRadius = 1.55f;
+		objectBomb.fFrameChangeTime = 0.333f;
+		objectBomb.nRunCurrentFrame = 0;
+		objectBomb.nRunFrames = 6;
+		objectBomb.nDefaultLives = 99;
+		objectBomb.nLives = 99;
+		objectBomb.eObjecttype = BombObject;
+		objectBomb.pDecal = decEnemiesSpriteSheeta;
+		objectBomb.vCenterPos = { 4.0f, 4.0f };
+		objectBomb.vPos = { 3.0f, 3.0f };
+		objectBomb.vPotentialPosition = { 0.0f, 0.0f };
+		objectBomb.vSize = { 24, 24 };
+		objectBomb.vSourceSize = { 32, 32 };
+		objectBomb.vSourceStand = { 64, 48 };
+
+		objectBomb.vecRunFrame.clear();
+		objectBomb.vecRunFrame.push_back({ 64, 144 });
+		objectBomb.vecRunFrame.push_back({ 96, 144 });
+		objectBomb.vecRunFrame.push_back({ 128, 144 });
+		objectBomb.vecRunFrame.push_back({ 160, 144 });
+		objectBomb.vecRunFrame.push_back({ 192, 144 });
+		objectBomb.vecRunFrame.push_back({ 224, 144 });
+		objectBomb.vecRunFrame.push_back({ 256, 144 });
+
+		objectBomb.vVel = { 0.0f, 0.2f };
+		objectBomb.C64FileKey = C64FileTileKey.SetBomb1;
+
+		// Explsion
+		objectExplosion.fID = 1200.0f;
+		objectExplosion.fVelX = 0.5f;
+		objectExplosion.fRadius = 1.0f;
+		objectExplosion.nRunCurrentFrame = 0;
+		objectExplosion.nRunFrames = 4;
+		objectExplosion.nDefaultLives = 1;
+		objectExplosion.nLives = 1;
+		objectExplosion.eObjecttype = ExplosionObject;
+		objectExplosion.pDecal = decObjectsSpriteSheet;
+		objectExplosion.vCenterPos = { 4.0f, 4.0f };
+		objectExplosion.vPos = { 3.0f, 3.0f };
+		objectExplosion.vPotentialPosition = { 0.0f, 0.0f };
+		objectExplosion.vSize = { 24, 24 };
+		objectExplosion.vSourceSize = { 32, 32 };
+		objectExplosion.vSourceStand = { 64, 48 };
+
+		objectExplosion.vecRunFrame.clear();
+		objectExplosion.vecRunFrame.push_back({ 96, 48 });
+		objectExplosion.vecRunFrame.push_back({ 128, 48 });
+		objectExplosion.vecRunFrame.push_back({ 160, 48 });
+		objectExplosion.vecRunFrame.push_back({ 192, 48 });
+		objectExplosion.vecRunFrame.push_back({ 224, 48 });
+
+		objectExplosion.vVel = { 0.0f, 0.2f };
+		objectExplosion.C64FileKey = C64FileTileKey.SetExplosion1;
+
+
 
 		// And finally
 		objectPlayer.fID = 1.0f;
@@ -995,7 +1064,8 @@ public:
 		PlayerObject,
 		HeroObject,
 		EnemiesObject,
-		BombObject
+		BombObject,
+		ExplosionObject
 	};
 
 	struct sWorldObject
@@ -1024,6 +1094,7 @@ public:
 		float fGodModeTime = 0.0f;
 		float fTottleTime = 0.0f;
 		float fFlashTime = 0.1665f;
+		float fFrameChangeTime = 0.1665f;
 		float bShowHide = true;
 
 		float fRototaion = 0.0f;
@@ -1159,7 +1230,23 @@ public:
 			break;
 		case HotAirBalloon::BombObject:
 		{
-			//tba
+			for (auto& worldObject : vecObjectBombs)
+			{
+				if (worldObject.bIsDead) continue; // TODO remove from vector
+				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
+				{
+					worldObject.vPos = vTile;
+					worldObject.vPos.y += -0.5f;
+					worldObject.vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+					worldObject.vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
+					worldObject.vPotentialPosition = vTile;
+					worldObject.bEnabled = true;
+					worldObject.bRunningRight = bRunningRight;
+					break;
+				}
+			}
+			break;
 			break;
 		}
 		default:
@@ -1180,7 +1267,7 @@ public:
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
 
 		float rotation = 0.125;
-		if (worldObject->fFrameTime > 0.200f)
+		if (worldObject->fFrameTime > (worldObject->fFrameChangeTime * (worldObject->nRunCurrentFrame + 1)))
 		{
 			worldObject->nRunCurrentFrame += 1;
 			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size()) worldObject->nRunCurrentFrame = 0;
@@ -1212,19 +1299,32 @@ public:
 			return;
 		}
 
+		// Bomb Object
+		if (worldObject->eObjecttype == BombObject)
+		{
+			tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			return;
+		}
+
+		// Explosion Object
+		if (worldObject->eObjecttype == ExplosionObject)
+		{
+			tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			return;
+		}
 
 		if (worldObject->fID == objectC64Logo.fID)
 		{
 
 			if (worldObject->bRunningRight)
 			{
-				worldObject->fRototaion += rotation;
+				worldObject->fRototaion += worldObject->fFrameChangeTime;
 				tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, worldObject->fRototaion,
 					{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
 			}
 			else
 			{
-				worldObject->fRototaion += -rotation;
+				worldObject->fRototaion += worldObject->fFrameChangeTime;
 				tv.DrawRotatedDecal({ worldObject->vPos }, decC64Logo, worldObject->fRototaion,
 					{ float(decMSBanner->sprite->width / 2.0f), float(decMSBanner->sprite->height / 2.0f) }, { 0.01f, 0.01f });
 			}
@@ -1283,27 +1383,31 @@ public:
 		{
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-			// Speical Case
+			
+			switch (worldObject->eObjecttype)
 			{
-				if (!bIsPlayer)
+			case HeroObject:
+			case EnemiesObject:
+				if (worldObject->bRunningRight)
 				{
-
-					if (worldObject->bRunningRight)
-					{
-						worldObject->vEndPos.x = vTile->x;
-						worldObject->vEndPos.y = vTile->y;
-						worldObject->bRunningRight = false;
-					}
-					else
-					{
-						worldObject->vStartPos.x = vTile->x;
-						worldObject->vStartPos.y = vTile->y;
-						worldObject->bRunningRight = true;
-					}
-
-
+					worldObject->vEndPos.x = vTile->x;
+					worldObject->vEndPos.y = vTile->y;
+					worldObject->bRunningRight = false;
 				}
+				else
+				{
+					worldObject->vStartPos.x = vTile->x;
+					worldObject->vStartPos.y = vTile->y;
+					worldObject->bRunningRight = true;
+				}
+				break;
+			case BombObject:
+			case ExplosionObject:
+			case PlayerObject:
+			default:
+				break;
 			}
+
 
 
 		}
@@ -1342,13 +1446,24 @@ public:
 		if (std::isnan(worldObject->vPotentialPosition.x))
 		{
 			// ok we are stuck or dead
-			if (!bIsPlayer)
+			switch (worldObject->eObjecttype)
 			{
-				worldObject->bIsDead = true; // Player never dies
+			
+			case HeroObject:
+			case EnemiesObject:
+			case BombObject:
+			case ExplosionObject:
+				worldObject->bIsDead = true;
 				worldObject->bEnabled = false;
+				break;
+			case PlayerObject:
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+				break;
+			default:
+				break;
 			}
-			worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
-			worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+
 
 		}
 		if (std::isnan(fOverlap))
@@ -1365,34 +1480,112 @@ public:
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
 
-			// lets check did we hit a bomb or another enemies
-			if (testObject1->eObjecttype == HeroObject)
+			// we need to check what are we testing against and then apply the rules
+			// 1: Player can Touch a Hero Object and Bomb object, every else will cause a lost of a live
+			// 2: When bomb object is touch its direction will change
+			// 3: When a hero object or player object touchs an enemies a life will be lost
+			// 4: Explosion object cannot move and will take a live from anything that touches it
+
+			// Ok we will test the world object aganist our test object (debug this to get idea if what is happening)
+			// sorry lots of switches, it is best way trust me, it makes it easier for expansion later, just debug it
+			switch (testObject1->eObjecttype)
 			{
-				// the hero is fine to touch
-				// TODO:
-				int test = 0;
-				test++;
-			}
-			else
-			{
-				// Only execute if the object can lose lives
+			case ExplosionObject:
+				// Rule 4 everyone loses a life
 				if (worldObject->bCanLoseLives)
 				{
-					worldObject->nLives--;
-
-					if (worldObject->nLives < 1)
-					{
-						worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
-						worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
-						worldObject->bEnabled = false;
-						worldObject->bIsDead = true;
-
-					}
+					worldObject->nLives--; // we lose a life
 					worldObject->bCanLoseLives = false;
 				}
+				break;
+
+			case PlayerObject:
+			case HeroObject:
+				switch (worldObject->eObjecttype)
+				{
+				case HeroObject:
+				case PlayerObject:
+					// rule 1
+					// Nothiong to do here they can touch
+					break;
+				case BombObject:
+					// rule 2 change direction
+					worldObject->bRunningRight = testObject1->bRunningRight;
+					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
+					break;
+				case EnemiesObject:
+				case ExplosionObject:
+					// Rule 3
+					if (worldObject->bCanLoseLives)
+					{
+						worldObject->nLives--; // we lose a life
+						worldObject->bCanLoseLives = false;
+					}
+					break;
+				default:
+					break;
+				}
+
+				break;
+
+
+			case EnemiesObject:
+				switch (worldObject->eObjecttype)
+				{
+				case HeroObject:
+				case PlayerObject:
+					// Rule 3
+					if (worldObject->bCanLoseLives)
+					{
+						worldObject->nLives--; // we lose a life
+						worldObject->bCanLoseLives = false;
+					}
+					break;
+				case BombObject:
+					// rule 2 change direction
+					worldObject->bRunningRight = testObject1->bRunningRight;
+					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
+					break;
+				case ExplosionObject:
+					// Rule 3
+					if (testObject1->bCanLoseLives)
+					{
+						testObject1->nLives--; // we lose a life
+						testObject1->bCanLoseLives = false;
+					}
+					break;
+				case EnemiesObject:
+					break;
+				default:
+					break;
+				}
+
+				break;
+			case BombObject:
+				// it does nothing the other object will move it around
+				break;
+			default:
+				break;
+			}
+
+			// finaly lets check who is dead
+			if (testObject1->nLives < 1)
+			{
+				testObject1->vPotentialPosition.x = testObject1->vStartPos.x;
+				testObject1->vPotentialPosition.y = testObject1->vStartPos.y;
+				testObject1->bEnabled = false;
+				testObject1->bIsDead = true;
 
 			}
 
+			if (worldObject->nLives < 1)
+			{
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x; 
+				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+				worldObject->bEnabled = false;
+				worldObject->bIsDead = true;
+
+			}
 
 
 
@@ -1513,6 +1706,16 @@ public:
 			bShowGridHero = false;
 			bShowGridEnemies = false;
 			bShowGridObjects = true;
+		}
+
+		if (GetKey(olc::B).bPressed)
+		{
+			// We want to drop a bomb
+			int idx = (int)objectPlayer.vPos.y * m_vWorldSize.x + (int)objectPlayer.vPos.x;
+			vWorldMapObjects[idx] = C64FileTileKey.SetBomb1;
+			sWorldObject worldObject = objectBomb;
+			worldObject.fStartIndex = idx;
+			vecObjectBombs.push_back({ worldObject });
 		}
 
 	}
@@ -1692,6 +1895,32 @@ public:
 
 		}
 
+		for (auto& worldObject : vecObjectBombs)
+		{
+			if (worldObject.bEnabled)
+			{
+				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
+				worldObject.vVel = { 0.0f, 0.2f };
+				if (worldObject.bCanMove)
+				{
+					if (worldObject.bRunningRight)
+					{
+						worldObject.vVel += {+worldObject.fVelX, worldObject.fVelY};
+					}
+					else
+					{
+						worldObject.vVel += {-worldObject.fVelX, worldObject.fVelY};
+					};
+					worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+					worldObject.bVelChanged = true;
+				}
+
+			}
+
+		}
+
+		
+
 
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
@@ -1721,7 +1950,10 @@ public:
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
 					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
-
+					for (auto& worldObject : vecObjectBombs)
+					{
+						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+					}
 
 					if (bShowGrid && bShowGridPlayer)
 					{
@@ -1859,6 +2091,12 @@ public:
 
 				}
 
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetBomb1)
+				{
+					EnableWorldObject(vTile, WorldObjectType::BombObject, true, idx, vWorldMapObjects[idx]);
+
+				}
+
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
 				{
 
@@ -1891,7 +2129,6 @@ public:
 
 				}
 
-				// TODO: Needs refactoring... no time in Jam time
 				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Blank)
 				{
 					if (bShowGrid)
@@ -1989,7 +2226,6 @@ public:
 					continue;
 				}
 
-
 				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Orange)
 				{
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Orange);
@@ -2002,7 +2238,6 @@ public:
 					tv.FillRectDecal(vTile, { 1.0, 1.0 }, C64Color.Purple);
 					continue;
 				}
-
 
 				if (vWorldMapPlayerGraphics[idx] == C64FileTileKey.Red)
 				{
@@ -2073,14 +2308,16 @@ public:
 		HandleAllLivesLost(&objectPlayer, bReset);
 		HandleGodMode(fElapsedTime, &objectPlayer);
 
+
+		// Step 1 we need to test the hero against the enemies
 		for (auto& heroObject : vecObjectHeros)
 		{
 			HandleBorders(&heroObject);
 			HandleAllLivesLost(&heroObject, bReset);
 			DrawWorldObjects(fElapsedTime, &heroObject, true);
-			HandleObjectCollison(&heroObject, &objectPlayer, true);
-			HandleGodMode(fElapsedTime, &heroObject);
-
+			HandleObjectCollison(&heroObject, &objectPlayer, true); // handle player v hero
+			
+			
 		}
 
 		for (auto& enemiesObject : vecObjectEnemies)
@@ -2088,8 +2325,30 @@ public:
 			HandleBorders(&enemiesObject);
 			HandleAllLivesLost(&enemiesObject, bReset);
 			DrawWorldObjects(fElapsedTime, &enemiesObject, true);
-			HandleObjectCollison(&enemiesObject, &objectPlayer, true);
-			HandleGodMode(fElapsedTime, &enemiesObject);
+			//HandleObjectCollison(&enemiesObject, &objectPlayer, true); // handle player v enemies
+			//HandleObjectCollison(&heroObject, &enemiesObject, true); // handle hero v enemies
+			//HandleGodMode(fElapsedTime, &heroObject);	// handle God mode hero
+			//HandleGodMode(fElapsedTime, &objectPlayer); // handle God mode player
+			//HandleGodMode(fElapsedTime, &enemiesObject);
+		}
+
+		for (auto& bombObject : vecObjectBombs)
+		{
+			HandleBorders(&bombObject);
+			HandleAllLivesLost(&bombObject, bReset);
+			DrawWorldObjects(fElapsedTime, &bombObject, true);
+			HandleObjectCollison(&bombObject, &objectPlayer, true);	// handle player v bomb
+			//for (auto& heroObject : vecObjectHeros)
+			//{
+			//	HandleObjectCollison(&bombObject, &heroObject, true);	// handle hero v bomb
+			//	HandleGodMode(fElapsedTime, &heroObject);
+
+			//}
+			//for (auto& enemiesObject : vecObjectEnemies)
+			//{
+			//	HandleObjectCollison(&bombObject, &enemiesObject, true); // handle enemies v bomb
+			//	HandleGodMode(fElapsedTime, &enemiesObject);
+			//}
 
 		}
 
