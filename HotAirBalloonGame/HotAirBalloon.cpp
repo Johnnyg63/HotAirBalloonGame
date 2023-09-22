@@ -892,7 +892,7 @@ private:
 		objectBomb.fID = 1100.0f;
 		objectBomb.fVelX = 0.2f;
 		objectBomb.fVelY = 0.2f;
-		objectBomb.fRadius = 1.55f;
+		objectBomb.fRadius = 1.0f;
 		objectBomb.fFrameChangeTime = 0.333f;
 		objectBomb.nRunCurrentFrame = 0;
 		objectBomb.nRunFrames = 6;
@@ -1302,7 +1302,7 @@ public:
 		// Bomb Object
 		if (worldObject->eObjecttype == BombObject)
 		{
-			tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(0.75f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			return;
 		}
 
@@ -1361,9 +1361,9 @@ public:
 	}
 
 	// lets get the collision
-	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject, bool bIsPlayer)
+	void HandleCollison(float fElapsedTime, olc::vi2d* vTile, sWorldObject* worldObject)
 	{
-		if (!bIsPlayer)
+		if (worldObject->eObjecttype != PlayerObject)
 		{
 			if (!worldObject->bEnabled || !worldObject->bVelChanged) return;
 
@@ -1414,7 +1414,10 @@ public:
 
 		// Set the objects new position to the allowed potential position
 		worldObject->vPos = worldObject->vPotentialPosition;
-		if (bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
+		if (worldObject->eObjecttype == PlayerObject)
+		{
+			vTrackedPoint = worldObject->vPotentialPosition;
+		}
 
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
@@ -1455,6 +1458,8 @@ public:
 			case ExplosionObject:
 				worldObject->bIsDead = true;
 				worldObject->bEnabled = false;
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 				break;
 			case PlayerObject:
 				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
@@ -1592,8 +1597,13 @@ public:
 		}
 
 		// Set the objects new position to the allowed potential position
-		worldObject->vPos = worldObject->vPotentialPosition;
-		if (bIsPlayer) vTrackedPoint = worldObject->vPotentialPosition;
+		worldObject->vPos.x = worldObject->vPotentialPosition.x;
+
+		if (worldObject->eObjecttype == PlayerObject)
+		{
+			vTrackedPoint = worldObject->vPotentialPosition;
+		}
+
 
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
@@ -1805,7 +1815,18 @@ public:
 				break;
 
 			case HotAirBalloon::BombObject:
-				//TODO we need to remove it from the vector
+				if (bReset)
+				{
+					vecObjectBombs.clear();
+				}
+				for (size_t i = 0; i < vecObjectBombs.size(); i++)
+				{
+					if (vecObjectBombs[i].bIsDead) {
+						// ok we should now handle the explosion
+						// however this is occuring as the bomb is stuck.... need to have a think about this
+						vecObjectBombs.erase(vecObjectBombs.begin() + i);
+					}
+				}
 				break;
 
 			default:
@@ -1949,10 +1970,10 @@ public:
 				// Lets get our collison
 				if (vWorldMapPlayer[idx] == C64FileTileKey.SetBlockPlayer)
 				{
-					HandleCollison(fElapsedTime, &vTile, &objectPlayer, true);
+					HandleCollison(fElapsedTime, &vTile, &objectPlayer);
 					for (auto& worldObject : vecObjectBombs)
 					{
-						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+						HandleCollison(fElapsedTime, &vTile, &worldObject);
 					}
 
 					if (bShowGrid && bShowGridPlayer)
@@ -2102,7 +2123,7 @@ public:
 
 					for (auto& worldObject : vecObjectHeros)
 					{
-						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+						HandleCollison(fElapsedTime, &vTile, &worldObject);
 					}
 
 					if (bShowGrid && bShowGridHero)
@@ -2118,7 +2139,7 @@ public:
 				{
 					for (auto& worldObject : vecObjectEnemies)
 					{
-						HandleCollison(fElapsedTime, &vTile, &worldObject, false);
+						HandleCollison(fElapsedTime, &vTile, &worldObject);
 					}
 
 					if (bShowGrid && bShowGridEnemies)
@@ -2302,22 +2323,21 @@ public:
 		if(objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
 			tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
-
 		HandleBorders(&objectPlayer);
 		bool bReset = objectPlayer.bIsDead; // if the player is dead it is time to reset
 		HandleAllLivesLost(&objectPlayer, bReset);
 		HandleGodMode(fElapsedTime, &objectPlayer);
 
-
-		// Step 1 we need to test the hero against the enemies
-		for (auto& heroObject : vecObjectHeros)
+		for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 		{
 			HandleBorders(&heroObject);
 			HandleAllLivesLost(&heroObject, bReset);
 			DrawWorldObjects(fElapsedTime, &heroObject, true);
-			HandleObjectCollison(&heroObject, &objectPlayer, true); // handle player v hero
-			
-			
+			HandleObjectCollison(&heroObject, &objectPlayer, true);
+
+
+			HandleGodMode(fElapsedTime, &heroObject);
+
 		}
 
 		for (auto& enemiesObject : vecObjectEnemies)
@@ -2325,11 +2345,17 @@ public:
 			HandleBorders(&enemiesObject);
 			HandleAllLivesLost(&enemiesObject, bReset);
 			DrawWorldObjects(fElapsedTime, &enemiesObject, true);
-			//HandleObjectCollison(&enemiesObject, &objectPlayer, true); // handle player v enemies
-			//HandleObjectCollison(&heroObject, &enemiesObject, true); // handle hero v enemies
-			//HandleGodMode(fElapsedTime, &heroObject);	// handle God mode hero
-			//HandleGodMode(fElapsedTime, &objectPlayer); // handle God mode player
-			//HandleGodMode(fElapsedTime, &enemiesObject);
+			HandleObjectCollison(&enemiesObject, &objectPlayer, true); //handles enemies v player
+			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
+			{
+				HandleObjectCollison(&heroObject, &enemiesObject, true);  //handles enemies v hero
+				HandleGodMode(fElapsedTime, &heroObject);
+
+			}
+
+			//TODO: Enemies v Hero
+			HandleGodMode(fElapsedTime, &enemiesObject);
+
 		}
 
 		for (auto& bombObject : vecObjectBombs)
@@ -2337,20 +2363,22 @@ public:
 			HandleBorders(&bombObject);
 			HandleAllLivesLost(&bombObject, bReset);
 			DrawWorldObjects(fElapsedTime, &bombObject, true);
-			HandleObjectCollison(&bombObject, &objectPlayer, true);	// handle player v bomb
-			//for (auto& heroObject : vecObjectHeros)
-			//{
-			//	HandleObjectCollison(&bombObject, &heroObject, true);	// handle hero v bomb
-			//	HandleGodMode(fElapsedTime, &heroObject);
+			//HandleObjectCollison(&bombObject, &objectPlayer, true);	// bombs do not affect the player
+			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
+			{
+				HandleObjectCollison(&heroObject, &bombObject, true);  //handles enemies v hero
+				HandleGodMode(fElapsedTime, &heroObject);
 
-			//}
-			//for (auto& enemiesObject : vecObjectEnemies)
-			//{
-			//	HandleObjectCollison(&bombObject, &enemiesObject, true); // handle enemies v bomb
-			//	HandleGodMode(fElapsedTime, &enemiesObject);
-			//}
+			}
+			for (auto& enemiesObject : vecObjectEnemies)
+			{
+				HandleObjectCollison(&enemiesObject, &bombObject, true);  //handles enemies v hero
+				HandleGodMode(fElapsedTime, &enemiesObject);
+			}
 
 		}
+
+		// TODO Explosions
 
 
 		HandleInput(fElapsedTime, vTile);
