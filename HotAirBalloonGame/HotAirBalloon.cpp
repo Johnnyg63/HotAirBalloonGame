@@ -919,7 +919,7 @@ private:
 		objectBomb.vVel = { 0.0f, 0.2f };
 		objectBomb.C64FileKey = C64FileTileKey.SetBomb1;
 
-		// Explsion
+		// Explosion
 		objectExplosion.fID = 1200.0f;
 		objectExplosion.fVelX = 0.5f;
 		objectExplosion.fRadius = 1.0f;
@@ -937,11 +937,11 @@ private:
 		objectExplosion.vSourceStand = { 64, 48 };
 
 		objectExplosion.vecRunFrame.clear();
-		objectExplosion.vecRunFrame.push_back({ 96, 48 });
-		objectExplosion.vecRunFrame.push_back({ 128, 48 });
+		//objectExplosion.vecRunFrame.push_back({ 128, 48 });
 		objectExplosion.vecRunFrame.push_back({ 160, 48 });
 		objectExplosion.vecRunFrame.push_back({ 192, 48 });
 		objectExplosion.vecRunFrame.push_back({ 224, 48 });
+		objectExplosion.vecRunFrame.push_back({ 32, 80 });
 
 		objectExplosion.vVel = { 0.0f, 0.2f };
 		objectExplosion.C64FileKey = C64FileTileKey.SetExplosion1;
@@ -1121,6 +1121,7 @@ public:
 	std::vector<sWorldObject> vecObjectHeros;	// Hero Objects
 	std::vector<sWorldObject> vecObjectEnemies;	// Enemies Objects
 	std::vector<sWorldObject> vecObjectBombs;	// Bombs Objects
+	std::vector<sWorldObject> vecObjectExplosion;	// Bombs Objects
 
 	sWorldObject objectRick;
 	sWorldObject objectC64Banner;
@@ -1193,6 +1194,7 @@ public:
 		switch (objectType)
 		{
 		case HotAirBalloon::HeroObject:
+		{
 			for (auto& worldObject : vecObjectHeros)
 			{
 				if (worldObject.bIsDead) continue;
@@ -1210,7 +1212,10 @@ public:
 				}
 			}
 			break;
+		}
+
 		case HotAirBalloon::EnemiesObject:
+		{
 			for (auto& worldObject : vecObjectEnemies)
 			{
 				if (worldObject.bIsDead) continue;
@@ -1228,6 +1233,8 @@ public:
 				}
 			}
 			break;
+		}
+
 		case HotAirBalloon::BombObject:
 		{
 			for (auto& worldObject : vecObjectBombs)
@@ -1247,6 +1254,26 @@ public:
 				}
 			}
 			break;
+		}
+
+		case HotAirBalloon::ExplosionObject:
+		{
+			for (auto& worldObject : vecObjectExplosion)
+			{
+				if (worldObject.bIsDead) continue; // TODO remove from vector
+				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
+				{
+					worldObject.vPos = vTile;
+					worldObject.vPos.y += -0.5f;
+					worldObject.vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+					worldObject.vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
+					worldObject.vPotentialPosition = vTile;
+					worldObject.bEnabled = true;
+					worldObject.bRunningRight = bRunningRight;
+					break;
+				}
+			}
 			break;
 		}
 		default:
@@ -1259,7 +1286,6 @@ public:
 	// Draw the world objects, Heros, Enemies etc
 	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject, bool bIsForeGround)
 	{
-		
 
 		if (!worldObject->bEnabled || worldObject->bIsDead) return;
 		if (bIsForeGround != worldObject->bIsForeGround) return;
@@ -1270,7 +1296,15 @@ public:
 		if (worldObject->fFrameTime > (worldObject->fFrameChangeTime * (worldObject->nRunCurrentFrame + 1)))
 		{
 			worldObject->nRunCurrentFrame += 1;
-			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size()) worldObject->nRunCurrentFrame = 0;
+			if (worldObject->nRunCurrentFrame >= worldObject->vecRunFrame.size())
+			{
+				if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject)
+				{
+					// ok lets kill it
+					worldObject->bIsDead = true;
+				}
+				worldObject->nRunCurrentFrame = 0;
+			}
 
 			worldObject->fFrameTime = 0.0f;
 
@@ -1302,14 +1336,26 @@ public:
 		// Bomb Object
 		if (worldObject->eObjecttype == BombObject)
 		{
-			tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(0.75f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			if (worldObject->bIsDead)
+			{
+				// ok we need to inject a Explosion
+				int idx = (int)worldObject->vPos.y * m_vWorldSize.x + (int)worldObject->vPos.x;
+				vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
+				sWorldObject worldObject = objectExplosion;
+				worldObject.fStartIndex = idx;
+				vecObjectExplosion.push_back({ worldObject });
+			}
+			else
+			{
+				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(0.75f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			}
 			return;
 		}
 
 		// Explosion Object
 		if (worldObject->eObjecttype == ExplosionObject)
 		{
-			tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
+			if (!worldObject->bIsDead) tv.DrawPartialDecal(worldObject->vPos, worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 			return;
 		}
 
@@ -1346,8 +1392,8 @@ public:
 
 		if (worldObject->bRunningRight)
 		{
-			
-			if (worldObject->bCanLoseLives || worldObject->bShowHide) 
+
+			if (worldObject->bCanLoseLives || worldObject->bShowHide)
 				tv.DrawPartialDecal(worldObject->vPos - olc::vf2d(1.0f, 0.4f), worldObject->vSize, worldObject->pDecal, vFrame, worldObject->vSourceSize);
 		}
 		else
@@ -1383,7 +1429,7 @@ public:
 		{
 			// Statically resolve the collision
 			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-			
+
 			switch (worldObject->eObjecttype)
 			{
 			case HeroObject:
@@ -1451,20 +1497,42 @@ public:
 			// ok we are stuck or dead
 			switch (worldObject->eObjecttype)
 			{
-			
+
 			case HeroObject:
 			case EnemiesObject:
-			case BombObject:
-			case ExplosionObject:
+			{
 				worldObject->bIsDead = true;
 				worldObject->bEnabled = false;
 				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
 				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 				break;
-			case PlayerObject:
+			}
+			case BombObject:
+			{
+				worldObject->bIsDead = true;
+				worldObject->bEnabled = false;
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+				// ok we are stuck lets blow it up
+				return;
+				break;
+
+			}
+			case ExplosionObject:
+			{
+				worldObject->bIsDead = true;
+				worldObject->bEnabled = false;
 				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
 				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 				break;
+			}
+			case PlayerObject:
+			{
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
+				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+				break;
+			}
+				
 			default:
 				break;
 			}
@@ -1585,7 +1653,7 @@ public:
 
 			if (worldObject->nLives < 1)
 			{
-				worldObject->vPotentialPosition.x = worldObject->vStartPos.x; 
+				worldObject->vPotentialPosition.x = worldObject->vStartPos.x;
 				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 				worldObject->bEnabled = false;
 				worldObject->bIsDead = true;
@@ -1727,6 +1795,15 @@ public:
 			worldObject.fStartIndex = idx;
 			vecObjectBombs.push_back({ worldObject });
 		}
+		if (GetKey(olc::E).bPressed)
+		{
+			// We want to drop a bomb
+			int idx = (int)objectPlayer.vPos.y * m_vWorldSize.x + (int)objectPlayer.vPos.x;
+			vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
+			sWorldObject worldObject = objectExplosion;
+			worldObject.fStartIndex = idx;
+			vecObjectExplosion.push_back({ worldObject });
+		}
 
 	}
 
@@ -1740,6 +1817,7 @@ public:
 			worldObject->vPos.x < tv.GetTopLeftTile().x)
 		{
 			worldObject->bEnabled = false;
+			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 			worldObject->bVelChanged = false;
 			worldObject->bVelChanged = false;
 		}
@@ -1749,6 +1827,7 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 
@@ -1756,6 +1835,7 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 
@@ -1763,6 +1843,7 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == BombObject || worldObject->eObjecttype == ExplosionObject) worldObject->bIsDead = true;
 
 		}
 	}
@@ -1798,13 +1879,16 @@ public:
 			switch (worldObject->eObjecttype)
 			{
 			case HotAirBalloon::PlayerObject:
+			{
 				worldObject->bIsDead = false;
 				worldObject->bEnabled = true;
 				worldObject->nLives = worldObject->nDefaultLives;
 				break;
+			}
 
 			case HotAirBalloon::HeroObject:
 			case HotAirBalloon::EnemiesObject:
+			{
 				// Special case we only reset enemies if the game is been rest. i.e the player isDead
 				if (bReset && worldObject->bIsDead)
 				{
@@ -1813,8 +1897,10 @@ public:
 					worldObject->nLives = worldObject->nDefaultLives;
 				}
 				break;
+			}
 
 			case HotAirBalloon::BombObject:
+			{
 				if (bReset)
 				{
 					vecObjectBombs.clear();
@@ -1822,12 +1908,27 @@ public:
 				for (size_t i = 0; i < vecObjectBombs.size(); i++)
 				{
 					if (vecObjectBombs[i].bIsDead) {
-						// ok we should now handle the explosion
-						// however this is occuring as the bomb is stuck.... need to have a think about this
 						vecObjectBombs.erase(vecObjectBombs.begin() + i);
 					}
 				}
 				break;
+			}	
+			case HotAirBalloon::ExplosionObject:
+			{
+				if (bReset)
+				{
+					vecObjectExplosion.clear();
+				}
+				for (size_t i = 0; i < vecObjectExplosion.size(); i++)
+				{
+					if (vecObjectExplosion[i].bIsDead) {
+						// ok we should now handle the explosion
+						// however this is occuring as the bomb is stuck.... need to have a think about this
+						vecObjectExplosion.erase(vecObjectExplosion.begin() + i);
+					}
+				}
+				break;
+			}
 
 			default:
 				break;
@@ -1940,7 +2041,7 @@ public:
 
 		}
 
-		
+
 
 
 		// true is returned
@@ -2115,6 +2216,12 @@ public:
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetBomb1)
 				{
 					EnableWorldObject(vTile, WorldObjectType::BombObject, true, idx, vWorldMapObjects[idx]);
+
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetExplosion1)
+				{
+					EnableWorldObject(vTile, WorldObjectType::ExplosionObject, true, idx, vWorldMapObjects[idx]);
 
 				}
 
@@ -2320,7 +2427,7 @@ public:
 			}
 		}
 
-		if(objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
+		if (objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
 			tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
 
 		HandleBorders(&objectPlayer);
@@ -2334,8 +2441,6 @@ public:
 			HandleAllLivesLost(&heroObject, bReset);
 			DrawWorldObjects(fElapsedTime, &heroObject, true);
 			HandleObjectCollison(&heroObject, &objectPlayer, true);
-
-
 			HandleGodMode(fElapsedTime, &heroObject);
 
 		}
@@ -2375,6 +2480,17 @@ public:
 				HandleObjectCollison(&enemiesObject, &bombObject, true);  //handles enemies v hero
 				HandleGodMode(fElapsedTime, &enemiesObject);
 			}
+
+		}
+
+
+		for (auto& explosionObject : vecObjectExplosion)
+		{
+			HandleBorders(&explosionObject);
+			HandleAllLivesLost(&explosionObject, bReset);
+			DrawWorldObjects(fElapsedTime, &explosionObject, true);
+			//HandleObjectCollison(&explosionObject, &objectPlayer, true);
+			HandleGodMode(fElapsedTime, &explosionObject);
 
 		}
 
