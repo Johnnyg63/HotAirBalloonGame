@@ -177,8 +177,11 @@ private:
 	std::string strPlay = "PRESS PLAY ON TAPE";
 	std::string strLoading = "LOADING...";
 	std::string strRun = "RUN";
-	std::string strMovement = "USE ARROW KEYS OR WSAD TO MOVE";
+	std::string strMovement = "USE ARROW KEYS OR WSAD TO MOVE, B FOR BOMBS";
 	std::string strMission = "YOUR MISSION IS TO HELP ALL THE C64 HEROS";
+	std::string strRickForgot = "YOU FORGOT RICK!!";
+	std::string strRickDead = "RICK IS DEAD, GAME OVER!";
+	std::string strPlayerDead = "YOU DEAD, GAME OVER!";
 	std::string strCOPY1 = "This demo is for eduction purposes only, images, logos and trademarks are owned by their respective identities";
 	std::string strCOPY2 = "Power by OLC Pixel Game Engine 2.0. C OneLoneCoder.com 2023";
 
@@ -906,7 +909,7 @@ private:
 		objectBomb.vPotentialPosition = { 0.0f, 0.0f };
 		objectBomb.vSize = { 24, 24 };
 		objectBomb.vSourceSize = { 32, 32 };
-		objectBomb.vSourceStand = { 64, 48 };
+		objectBomb.vSourceStand = { 64, 144 };
 
 		objectBomb.vecRunFrame.clear();
 		objectBomb.vecRunFrame.push_back({ 64, 144 });
@@ -935,7 +938,7 @@ private:
 		objectExplosion.vPotentialPosition = { 0.0f, 0.0f };
 		objectExplosion.vSize = { 24, 24 };
 		objectExplosion.vSourceSize = { 32, 32 };
-		objectExplosion.vSourceStand = { 64, 48 };
+		objectExplosion.vSourceStand = { 160, 48 };
 
 		objectExplosion.vecRunFrame.clear();
 		//objectExplosion.vecRunFrame.push_back({ 128, 48 });
@@ -1306,7 +1309,8 @@ public:
 					int vPosX = worldObject->vPos.x;
 					int vPosY = worldObject->vPos.y;
 
-					int idx = vPosY * m_vWorldSize.x + vPosX;
+					size_t idx = (vPosY * m_vWorldSize.x) + vPosX;
+					idx = std::min(idx, (vWorldMapObjects.size() - 1)); // Edge case, we to ensure we are within the array range
 					vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
 					sWorldObject worldObject1 = objectExplosion;
 					worldObject1.fStartIndex = idx;
@@ -1823,7 +1827,8 @@ public:
 		if (GetKey(olc::B).bPressed)
 		{
 			// We want to drop a bomb
-			int idx = (int)objectPlayer.vPos.y * m_vWorldSize.x + (int)objectPlayer.vPos.x;
+			size_t idx = ((int)objectPlayer.vPos.y * m_vWorldSize.x) + (int)objectPlayer.vPos.x;
+			idx = std::min(idx, (vWorldMapObjects.size() - 1)); // Edge case, we to ensure we are within the array range
 			vWorldMapObjects[idx] = C64FileTileKey.SetBomb1;
 			sWorldObject worldObject = objectBomb;
 			worldObject.fStartIndex = idx;
@@ -1832,7 +1837,8 @@ public:
 		if (GetKey(olc::E).bPressed)
 		{
 			// We want to drop a bomb
-			int idx = (int)objectPlayer.vPos.y * m_vWorldSize.x + (int)objectPlayer.vPos.x;
+			size_t idx = ((int)objectPlayer.vPos.y * m_vWorldSize.x) + (int)objectPlayer.vPos.x;
+			idx = std::min(idx, (vWorldMapObjects.size() - 1)); // Edge case, we to ensure we are within the array range
 			vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
 			sWorldObject worldObject = objectExplosion;
 			worldObject.fStartIndex = idx;
