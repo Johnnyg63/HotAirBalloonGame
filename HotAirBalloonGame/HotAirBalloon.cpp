@@ -26,6 +26,19 @@ public:
 		sAppName = "Hot Air Balloon Johnnyg63";
 	}
 
+	float nStep = 20.0f; // Line step
+
+	// Use for displaying the correct messages
+	enum DisplayMessage {
+		Welcome,
+		Scores,
+		ForgotRick,
+		RickDead,
+		YouDead
+	};
+
+	DisplayMessage CurrentMessages = HotAirBalloon::Welcome;
+
 	/* Vectors */
 	std::vector<std::string> vecMessages;	// Hold messages to be displayed
 	std::vector<std::pair<int, olc::Pixel>> vecC64ColourCodes; // Holds the C64 colour code by key, value
@@ -182,6 +195,10 @@ private:
 	std::string strRickForgot = "YOU FORGOT RICK!!";
 	std::string strRickDead = "RICK IS DEAD, GAME OVER!";
 	std::string strPlayerDead = "YOU DEAD, GAME OVER!";
+	std::string strTotalScore = "TOTAL SCORE: ";
+	std::string strEnemiesAlive = "ENEMIES LEFT: ";
+	std::string strHeroLives = "HERO LIVES: ";
+	std::string strPlayLives = "PLAYER LIVES: ";
 	std::string strCOPY1 = "This demo is for eduction purposes only, images, logos and trademarks are owned by their respective identities";
 	std::string strCOPY2 = "Power by OLC Pixel Game Engine 2.0. C OneLoneCoder.com 2023";
 
@@ -754,7 +771,7 @@ private:
 		objectEgyptian.fID = 500.0f;
 		objectEgyptian.fRadius = 1.0f;
 		objectEgyptian.eObjecttype = EnemiesObject;
-		objectEgyptian.nDefaultLives = 3;
+		objectEgyptian.nDefaultLives = 1;
 		objectEgyptian.nLives = 1;
 		objectEgyptian.nRunCurrentFrame = 0;
 		objectEgyptian.nRunFrames = 3;
@@ -1477,7 +1494,7 @@ public:
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
 		{
-			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
+			//tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
 		}
 
 
@@ -1714,7 +1731,7 @@ public:
 		// Draw Velocity
 		if (worldObject->vVel.mag2() > 0)
 		{
-			tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
+			//tv.DrawLineDecal(worldObject->vPos, worldObject->vPos + worldObject->vVel.norm() * worldObject->fRadius, olc::MAGENTA);
 		}
 
 
@@ -1909,8 +1926,6 @@ public:
 	{
 		// For reset we simply reset all the objects to thier default values
 
-		
-
 		if (!worldObject->bCanLoseLives) return; // They are in god mode
 		
 		if (worldObject->nLives < 0) worldObject->bIsDead = true;
@@ -1974,6 +1989,8 @@ public:
 			objectPlayer.bCanLoseLives = false;
 			objectPlayer.bIsDead = false;
 			objectPlayer.nLives = objectPlayer.nDefaultLives;
+			objectPlayer.vPos = { 3.0f, 3.0f };
+			vTrackedPoint = objectPlayer.vPos;
 
 			// Clear the bombs
 			vecObjectBombs.clear();
@@ -1984,6 +2001,7 @@ public:
 				heroObject.bEnabled = false;
 				heroObject.bIsDead = false;
 				heroObject.nLives = heroObject.nDefaultLives;
+				heroObject.vPos = { 3.0f, 3.0f };
 			}
 
 			for (auto& enemiesObject : vecObjectEnemies)
@@ -1991,6 +2009,7 @@ public:
 				enemiesObject.bEnabled = false;
 				enemiesObject.bIsDead = false;
 				enemiesObject.nLives = enemiesObject.nDefaultLives;
+				enemiesObject.vPos = { 3.0f, 3.0f };
 			}
 
 		}
@@ -2000,6 +2019,135 @@ public:
 			worldObject->bIsDead = false;
 			worldObject->nLives = objectPlayer.nDefaultLives;
 		}
+	}
+
+	float fChangeMessageTime = 0.0f;
+
+	void HandleMessages(float fElapsedTime)
+	{
+		fChangeMessageTime += fElapsedTime;
+		vecMessages.clear();
+		switch (CurrentMessages)
+		{
+		case HotAirBalloon::Welcome:
+		{
+			if (fChangeMessageTime > 5)
+			{
+				fChangeMessageTime = 0.0f;
+				CurrentMessages = HotAirBalloon::Scores;
+				HandleMessages(fElapsedTime);
+			}
+			else
+			{
+				vecMessages.push_back({ strPrintRes });
+				vecMessages.push_back({ strMovement });
+				vecMessages.push_back({ strMission });
+			}
+			
+			break;
+		}	
+		case HotAirBalloon::Scores:
+		{
+			std::string message = strTotalScore + std::to_string(nTotalScore);
+			vecMessages.push_back({ message });	// TOTAL SCORE: 
+
+			message = strPlayLives + std::to_string(nPlayerLives);
+			vecMessages.push_back({ message });	// PLAYER LIVES:
+
+			message = strEnemiesAlive + std::to_string(nTotalEnemiesLeft);
+			vecMessages.push_back({ message }); // ENEMIES LEFT:
+
+			message = strHeroLives + std::to_string(nHeroLives);
+			vecMessages.push_back({ message });    // HERO LIVES:
+			fChangeMessageTime = 0.0f;
+			break;
+		}
+		case HotAirBalloon::ForgotRick:
+		{
+			if (fChangeMessageTime > 5)
+			{
+				fChangeMessageTime = 0.0f;
+				CurrentMessages = HotAirBalloon::Scores;
+				HandleMessages(fElapsedTime);
+			}
+			else
+			{
+				vecMessages.push_back({ strRickForgot });	// YOU FORGOT RICK!!
+			}
+			
+			break;
+		}
+		case HotAirBalloon::RickDead:
+		{
+			if (fChangeMessageTime > 5)
+			{
+				fChangeMessageTime = 0.0f;
+				CurrentMessages = HotAirBalloon::Welcome;
+				HandleReset();
+				HandleMessages(fElapsedTime);
+			}
+			else
+			{
+				vecMessages.push_back({ strRickDead });		// RICK IS DEAD, GAME OVER!
+			}
+			
+			break;
+		}
+		case HotAirBalloon::YouDead:
+		{
+			if (fChangeMessageTime > 5)
+			{
+				fChangeMessageTime = 0.0f;
+				CurrentMessages = HotAirBalloon::Welcome;
+				HandleReset();
+				HandleMessages(fElapsedTime);
+			}
+			else
+			{
+				vecMessages.push_back({ strRickDead });		// YOU DEAD, GAME OVER!
+			}
+			
+			break;
+		}
+			
+		default:
+
+			break;
+		}
+
+	}
+
+	int nTotalScore = 0;
+	int nTotalEnemiesLeft = 0;
+	int nPlayerLives = 0;
+	int nHeroLives = 0;
+	void HandleScores()
+	{
+		nTotalEnemiesLeft = vecObjectEnemies.size();
+		// lets get the total score and emenies left;
+		for (auto& enemiesObject : vecObjectEnemies)
+		{
+			if (enemiesObject.bIsDead)
+			{
+				nTotalScore += 10;
+				nTotalEnemiesLeft--;
+			}
+		}
+
+		nPlayerLives = objectPlayer.nLives;
+
+		for (auto& heroObject : vecObjectHeros)
+		{
+			// we only care about hero 1
+			if (heroObject.C64FileKey == C64FileTileKey.SetHero1)
+			{
+				// We have Rick
+				nHeroLives = heroObject.nLives;
+				break;
+			}
+		}
+
+
 	}
 
 	// Handle the Game graphics
@@ -2571,9 +2719,6 @@ public:
 			
 		}
 
-		// TODO Explosions
-
-
 		HandleInput(fElapsedTime, vTile);
 
 
@@ -2790,23 +2935,25 @@ public:
 			return true;
 		}
 
-		//FillRectDecal({ 0,0 }, { (float)ScreenWidth(), (float)ScreenHeight() }, C64Color.Blue);
-		//
-		//// Lets get the party going
-		//// first up we need a background
-		//DrawDecal({ 0, 40 }, decC64Level);
-		//
-		//if (GetMouse(0).bHeld) DrawDecal(GetMousePos(), decBalloon);
-
 
 		HandleGraphics(fElapsedTime);
+		
+		HandleScores();
+		
+		if (nPlayerLives < 0) CurrentMessages = YouDead;
+		if (nHeroLives < 0) CurrentMessages = RickDead;
 
-		DrawStringPropDecal({ 15, 20 }, strPrintRes, C64Color.LightBlue, { 1.0f, 0.8f });
-		DrawStringPropDecal({ 15, 30 }, strMovement, C64Color.LightBlue, { 1.0f, 0.8f });
-		DrawStringPropDecal({ 15, 40 }, strMission, C64Color.LightBlue, { 1.0f, 0.8f });
+		HandleMessages(fElapsedTime);
+		nStep = 10.0f;
+		for (auto& s : vecMessages)
+		{
+			DrawStringPropDecal( {15.0f, nStep}, s, C64Color.LightBlue, {1.0f, 0.8f});
+			nStep += 10.0f;
+		}
+		vecMessages.clear();
 
-		DrawStringPropDecal({ 15, 225 }, strCOPY1, C64Color.White, { 0.4f, 0.4f });
-		DrawStringPropDecal({ 15, 230 }, strCOPY2, C64Color.White, { 0.4f, 0.4f });
+		DrawStringPropDecal({ 15.0f, 225.0f }, strCOPY1, C64Color.White, { 0.4f, 0.4f });
+		DrawStringPropDecal({ 15.0f, 230.0f }, strCOPY2, C64Color.White, { 0.4f, 0.4f });
 
 		return true;
 	}
