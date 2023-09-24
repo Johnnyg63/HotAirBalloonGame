@@ -144,6 +144,7 @@ public:
 
 		uint8_t SetBomb1 = 210;		// Set position for bombs
 		uint8_t SetExplosion1 = 215;	// Set position for explosions
+		uint8_t SetDeadDance1 = 220;	// Set position for dead dance 
 
 
 		uint8_t Black = 0;		// Set the tile to this C64 Colour
@@ -772,7 +773,7 @@ private:
 		objectEgyptian.fRadius = 1.0f;
 		objectEgyptian.eObjecttype = EnemiesObject;
 		objectEgyptian.nDefaultLives = 1;
-		objectEgyptian.nLives = 1;
+		objectEgyptian.nLives = 0;
 		objectEgyptian.nRunCurrentFrame = 0;
 		objectEgyptian.nRunFrames = 3;
 		objectEgyptian.pDecal = decEnemiesSpriteSheeta;
@@ -781,11 +782,15 @@ private:
 		objectEgyptian.vPotentialPosition = { 0.0f, 0.0f };
 		objectEgyptian.vSize = { 24, 24 };
 		objectEgyptian.vSourceSize = { 32, 32 };
-		objectEgyptian.vSourceStand = { 64, 48 };
+		objectEgyptian.vSourceStand = { 160, 48 };
 
 		objectEgyptian.vecRunFrame.clear();
 		objectEgyptian.vecRunFrame.push_back({ 64, 48 });
 		objectEgyptian.vecRunFrame.push_back({ 96, 48 });
+
+		objectEgyptian.vecDeadDanceFrame.clear();
+		objectEgyptian.vecDeadDanceFrame.push_back({ 160, 48 });
+		objectEgyptian.vecDeadDanceFrame.push_back({ 192, 48 });
 
 		objectEgyptian.vVel = { 0.0f, 0.2f };
 		objectEgyptian.C64FileKey = C64FileTileKey.SetEnemies1;
@@ -1086,7 +1091,8 @@ public:
 		HeroObject,
 		EnemiesObject,
 		BombObject,
-		ExplosionObject
+		ExplosionObject,
+		DeadDanceObject
 	};
 
 	struct sWorldObject
@@ -1129,6 +1135,7 @@ public:
 		olc::vf2d vSourceSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceStand = { 0.0f, 0.0f };
 		std::vector<olc::vf2d> vecRunFrame;
+		std::vector<olc::vf2d> vecDeadDanceFrame;
 		olc::vf2d vStartPos = { 0.0f, 0.0f };
 		olc::vf2d vEndPos = { 0.0f, 0.0f };
 
@@ -1143,6 +1150,7 @@ public:
 	std::vector<sWorldObject> vecObjectEnemies;	// Enemies Objects
 	std::vector<sWorldObject> vecObjectBombs;	// Bombs Objects
 	std::vector<sWorldObject> vecObjectExplosion;	// Bombs Objects
+	std::vector<sWorldObject> vecObjectDeadDance;	// Bombs Objects
 
 	sWorldObject objectRick;
 	sWorldObject objectC64Banner;
@@ -1270,7 +1278,7 @@ public:
 
 					worldObject.vPotentialPosition = vTile;
 					worldObject.bEnabled = true;
-					worldObject.bRunningRight = bRunningRight;
+					worldObject.bRunningRight = objectPlayer.bRunningRight;
 					break;
 				}
 			}
@@ -1297,6 +1305,25 @@ public:
 			}
 			break;
 		}
+		case HotAirBalloon::DeadDanceObject:
+		{
+			for (auto& worldObject : vecObjectDeadDance)
+			{
+				if (worldObject.bIsDead) continue; // TODO remove from vector
+				if (worldObject.fStartIndex == fStartIndex && worldObject.bEnabled == false && worldObject.C64FileKey == C64FileType)
+				{
+					worldObject.vPos = vTile;
+					worldObject.vPos.y += -0.5f;
+					worldObject.vStartPos = vTile - olc::vf2d{ 128.0f, 0.00f };
+					worldObject.vEndPos = vTile + olc::vf2d{ 128.0f, 3.0f };
+
+					worldObject.vPotentialPosition = vTile;
+					worldObject.bEnabled = true;
+					break;
+				}
+			}
+			break;
+		}
 		default:
 			break;
 		}
@@ -1312,8 +1339,14 @@ public:
 		if (bIsForeGround != worldObject->bIsForeGround) return;
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
-
 		float rotation = 0.125;
+		olc::vf2d vFrame = worldObject->vSourceStand;
+
+		// Special case Dead Dance Objects
+
+
+
+			// get the run frames
 		if (worldObject->fFrameTime > (worldObject->fFrameChangeTime * (worldObject->nRunCurrentFrame + 1)))
 		{
 			worldObject->nRunCurrentFrame += 1;
@@ -1326,13 +1359,14 @@ public:
 					int vPosX = worldObject->vPos.x;
 					int vPosY = worldObject->vPos.y;
 
-					size_t idx = (vPosY * m_vWorldSize.x) + vPosX;
-					idx = std::min(idx, (vWorldMapObjects.size() - 1)); // Edge case, we to ensure we are within the array range
+					int idx = (vPosY * m_vWorldSize.x) + vPosX;
+					idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size()));
+
 					vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
 					sWorldObject worldObject1 = objectExplosion;
 					worldObject1.fStartIndex = idx;
-					vecObjectExplosion.push_back({ worldObject1 });			
-					
+					vecObjectExplosion.push_back({ worldObject1 });
+
 					return;
 
 				}
@@ -1341,19 +1375,28 @@ public:
 					worldObject->bIsDead = true;
 					return;
 				}
+				if (worldObject->eObjecttype == EnemiesObject)
+				{
+					int test = 0;
+				}
+
 				worldObject->nRunCurrentFrame = 0;
 			}
 
 			worldObject->fFrameTime = 0.0f;
-
 		}
 
-		olc::vf2d vFrame = worldObject->vSourceStand;
-
+		// Set the Run Frame
 		if (worldObject->vecRunFrame.size() > 0)
 		{
 			vFrame = worldObject->vecRunFrame[worldObject->nRunCurrentFrame];
+			if (worldObject->eObjecttype == DeadDanceObject)
+			{
+				vFrame = worldObject->vecDeadDanceFrame[worldObject->nRunCurrentFrame];
+			}
+			
 		}
+
 
 		// Speical Case
 		if (worldObject->fID == objectC64Banner.fID)
@@ -1453,13 +1496,13 @@ public:
 		// therefore "statically" resolving the collision
 		if (fOverlap > 0)
 		{
-			// Statically resolve the collision
-			worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
-
+			
 			switch (worldObject->eObjecttype)
 			{
 			case HeroObject:
 			case EnemiesObject:
+				// Statically resolve the collision
+				worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
 				if (worldObject->bRunningRight)
 				{
 					worldObject->vEndPos.x = vTile->x;
@@ -1473,10 +1516,17 @@ public:
 					worldObject->bRunningRight = true;
 				}
 				break;
+			case DeadDanceObject:
+			{
+				// Dead Dance object has no collision
+				break;
+			}
 			case BombObject:
 			case ExplosionObject:
 			case PlayerObject:
 			default:
+				// Statically resolve the collision
+				worldObject->vPotentialPosition = worldObject->vPotentialPosition - vRayToNearest.norm() * fOverlap;
 				break;
 			}
 
@@ -1558,7 +1608,7 @@ public:
 				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
 				break;
 			}
-				
+
 			default:
 				break;
 			}
@@ -1621,7 +1671,7 @@ public:
 					// Nothiong to do here they can touch
 					break;
 				}
-					
+
 				case BombObject:
 				{
 					// rule 2 change direction
@@ -1629,7 +1679,7 @@ public:
 					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
 					break;
 				}
-					
+
 				case EnemiesObject:
 				case ExplosionObject:
 				{
@@ -1672,7 +1722,7 @@ public:
 					}
 					break;
 				}
-					
+
 				case BombObject:
 				{
 					// rule 2 change direction
@@ -1680,7 +1730,7 @@ public:
 					worldObject->fVelX = testObject1->fVelX + 0.1f; // Ensures it moves away from the object
 					break;
 				}
-					
+
 				case ExplosionObject:
 				{
 					// Rule 3
@@ -1708,7 +1758,7 @@ public:
 
 				break;
 			}
-				
+
 			case BombObject:
 				// it does nothing the other object will move it around
 				break;
@@ -1716,7 +1766,7 @@ public:
 				break;
 			}
 
-			
+
 		}
 
 		// Set the objects new position to the allowed potential position
@@ -1875,7 +1925,14 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
-			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == DeadDanceObject)
+			{
+				// Once a dead dance leaves the screen we are done with it
+				worldObject->nLives = -1;
+				worldObject->bIsDead = true;
+			}
+
+
 		}
 		if (worldObject->vPos.x > m_vWorldSize.x ||
 			worldObject->vPos.x > worldObject->vEndPos.x ||
@@ -1883,6 +1940,12 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == DeadDanceObject)
+			{
+				// Once a dead dance leaves the screen we are done with it
+				worldObject->nLives = -1;
+				worldObject->bIsDead = true;
+			}
 
 		}
 
@@ -1890,6 +1953,12 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == DeadDanceObject)
+			{
+				// Once a dead dance leaves the screen we are done with it
+				worldObject->nLives = -1;
+				worldObject->bIsDead = true;
+			}
 
 		}
 
@@ -1897,6 +1966,12 @@ public:
 		{
 			worldObject->bEnabled = false;
 			worldObject->bVelChanged = false;
+			if (worldObject->eObjecttype == DeadDanceObject)
+			{
+				// Once a dead dance leaves the screen we are done with it
+				worldObject->nLives = -1;
+				worldObject->bIsDead = true;
+			}
 
 		}
 	}
@@ -1927,7 +2002,7 @@ public:
 		// For reset we simply reset all the objects to thier default values
 
 		if (!worldObject->bCanLoseLives) return; // They are in god mode
-		
+
 		if (worldObject->nLives < 0) worldObject->bIsDead = true;
 
 		if (worldObject->bIsDead)
@@ -1943,12 +2018,37 @@ public:
 			}
 
 			case HotAirBalloon::HeroObject:
-			case HotAirBalloon::EnemiesObject:
 			{
-				// Special case we only reset enemies if the game is been rest. i.e the player isDead
 				worldObject->bIsDead = false;
 				worldObject->bEnabled = false;
-				
+
+				break;
+
+			}
+			case HotAirBalloon::EnemiesObject:
+			{
+				// lets do the dead dance baby
+				int vPosX = worldObject->vPos.x;
+				int vPosY = worldObject->vPos.y;
+
+				int idx = (vPosY * m_vWorldSize.x) + vPosX;
+				idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size()));
+				vWorldMapObjects[idx] = C64FileTileKey.SetDeadDance1;
+				sWorldObject* worldObject1 = new sWorldObject;
+				worldObject1 = worldObject;
+				worldObject1->vStartPos = { 0,0 };
+				worldObject1->vEndPos = m_vWorldSize;
+				worldObject1->fFrameChangeTime = 0.085;
+				worldObject1->nRunCurrentFrame = 0;
+				worldObject1->nRunFrames = 3;
+				worldObject1->nLives = 0;
+				worldObject1->bIsDead = false;
+				worldObject1->bEnabled = false;
+				worldObject1->bVelChanged = false;
+				worldObject1->fStartIndex = idx;
+				worldObject1->C64FileKey = C64FileTileKey.SetDeadDance1;
+				worldObject->eObjecttype = HotAirBalloon::DeadDanceObject;
+				vecObjectDeadDance.push_back({ *worldObject1 });
 				break;
 			}
 
@@ -1961,7 +2061,7 @@ public:
 					}
 				}
 				break;
-			}	
+			}
 			case HotAirBalloon::ExplosionObject:
 			{
 				for (size_t i = 0; i < vecObjectExplosion.size(); i++)
@@ -1970,6 +2070,19 @@ public:
 						// ok we should now handle the explosion
 						// however this is occuring as the bomb is stuck.... need to have a think about this
 						vecObjectExplosion.erase(vecObjectExplosion.begin() + i);
+					}
+				}
+				break;
+			}
+
+			case HotAirBalloon::DeadDanceObject:
+			{
+				for (size_t i = 0; i < vecObjectDeadDance.size(); i++)
+				{
+					if (vecObjectDeadDance[i].bIsDead) {
+						// ok we should now handle the explosion
+						// however this is occuring as the bomb is stuck.... need to have a think about this
+						vecObjectDeadDance.erase(vecObjectDeadDance.begin() + i);
 					}
 				}
 				break;
@@ -1995,23 +2108,10 @@ public:
 			// Clear the bombs
 			vecObjectBombs.clear();
 			vecObjectExplosion.clear();
-
-			for (auto& heroObject : vecObjectHeros)
-			{
-				heroObject.bEnabled = false;
-				heroObject.bIsDead = false;
-				heroObject.nLives = heroObject.nDefaultLives;
-				heroObject.vPos = { 3.0f, 3.0f };
-			}
-
-			for (auto& enemiesObject : vecObjectEnemies)
-			{
-				enemiesObject.bEnabled = false;
-				enemiesObject.bIsDead = false;
-				enemiesObject.nLives = enemiesObject.nDefaultLives;
-				enemiesObject.vPos = { 3.0f, 3.0f };
-			}
-
+			vecObjectHeros.clear();
+			vecObjectEnemies.clear();
+			vecObjectDeadDance.clear();
+			LoadMap("assets/levelonea.bin");
 		}
 		else
 		{
@@ -2043,9 +2143,9 @@ public:
 				vecMessages.push_back({ strMovement });
 				vecMessages.push_back({ strMission });
 			}
-			
+
 			break;
-		}	
+		}
 		case HotAirBalloon::Scores:
 		{
 			std::string message = strTotalScore + std::to_string(nTotalScore);
@@ -2074,7 +2174,7 @@ public:
 			{
 				vecMessages.push_back({ strRickForgot });	// YOU FORGOT RICK!!
 			}
-			
+
 			break;
 		}
 		case HotAirBalloon::RickDead:
@@ -2090,7 +2190,7 @@ public:
 			{
 				vecMessages.push_back({ strRickDead });		// RICK IS DEAD, GAME OVER!
 			}
-			
+
 			break;
 		}
 		case HotAirBalloon::YouDead:
@@ -2106,10 +2206,10 @@ public:
 			{
 				vecMessages.push_back({ strRickDead });		// YOU DEAD, GAME OVER!
 			}
-			
+
 			break;
 		}
-			
+
 		default:
 
 			break;
@@ -2172,12 +2272,14 @@ public:
 		if (GetKey(olc::Key::A).bHeld || GetKey(olc::Key::LEFT).bHeld)
 		{
 			objectPlayer.vVel += {-1, 0}; // left
+			objectPlayer.bRunningRight = false;
 
 		}
 
 		if (GetKey(olc::Key::D).bHeld || GetKey(olc::Key::RIGHT).bHeld)
 		{
 			objectPlayer.vVel += {+1, 0}; // right
+			objectPlayer.bRunningRight = true;
 
 		}
 
@@ -2255,6 +2357,29 @@ public:
 
 		}
 
+		for (auto& worldObject : vecObjectDeadDance)
+		{
+			if (worldObject.bEnabled)
+			{
+				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
+				worldObject.vVel = { 0.0f, 1.5f };
+				if (worldObject.bCanMove)
+				{
+					if (worldObject.bRunningRight)
+					{
+						worldObject.vVel += {+worldObject.fVelX, worldObject.fVelY};
+					}
+					else
+					{
+						worldObject.vVel += {-worldObject.fVelX, worldObject.fVelY};
+					};
+					worldObject.vPotentialPosition = worldObject.vPos + worldObject.vVel * 4.0f * fElapsedTime;
+					worldObject.bVelChanged = true;
+				}
+
+			}
+		}
+
 		// true is returned
 		bool bOnScreen = camera.Update(fElapsedTime);
 
@@ -2288,6 +2413,12 @@ public:
 						HandleCollison(fElapsedTime, &vTile, &worldObject);
 					}
 
+					for (auto& worldObject : vecObjectDeadDance)
+					{
+						HandleCollison(fElapsedTime, &vTile, &worldObject);
+					}
+
+
 					if (bShowGrid && bShowGridPlayer)
 					{
 						tv.FillRectDecal({ (float)vTile.x, (float)vTile.y }, { 1.0f, 1.0f }, C64Color.Red);
@@ -2296,6 +2427,7 @@ public:
 					}
 
 				}
+
 
 				if (vWorldMapObjects[idx] == C64FileTileKey.SetHero1)
 				{
@@ -2434,6 +2566,11 @@ public:
 				{
 					EnableWorldObject(vTile, WorldObjectType::ExplosionObject, true, idx, vWorldMapObjects[idx]);
 
+				}
+
+				if (vWorldMapObjects[idx] == C64FileTileKey.SetDeadDance1)
+				{
+					EnableWorldObject(vTile, WorldObjectType::DeadDanceObject, true, idx, vWorldMapObjects[idx]);
 				}
 
 				if (vWorldMapHero[idx] == C64FileTileKey.SetBlockHero)
@@ -2687,36 +2824,45 @@ public:
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &bombObject, true);  //handles enemies v hero
-				
+
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &bombObject, true);  //handles enemies v hero
-				
+
 			}
 
 		}
-
 
 		for (auto& explosionObject : vecObjectExplosion)
 		{
 			HandleAllLivesLost(&explosionObject);
 			DrawWorldObjects(fElapsedTime, &explosionObject, true);
-			
+
 			for (auto& heroObject : vecObjectHeros) // Handles Hero v Player
 			{
 				HandleObjectCollison(&heroObject, &explosionObject, true);  //handles enemies v hero
-				
+
 
 			}
 			for (auto& enemiesObject : vecObjectEnemies)
 			{
 				HandleObjectCollison(&enemiesObject, &explosionObject, true);  //handles enemies v hero
-				
+
 			}
 
-			
+
+		}
+
+
+		// we handle the dead dance differently ,
+		for (auto& deaddanceObject : vecObjectDeadDance)
+		{
+			HandleBorders(&deaddanceObject);
+			HandleAllLivesLost(&deaddanceObject);
+			DrawWorldObjects(fElapsedTime, &deaddanceObject, true);
+
 		}
 
 		HandleInput(fElapsedTime, vTile);
@@ -2937,9 +3083,9 @@ public:
 
 
 		HandleGraphics(fElapsedTime);
-		
+
 		HandleScores();
-		
+
 		if (nPlayerLives < 0) CurrentMessages = YouDead;
 		if (nHeroLives < 0) CurrentMessages = RickDead;
 
@@ -2947,7 +3093,7 @@ public:
 		nStep = 10.0f;
 		for (auto& s : vecMessages)
 		{
-			DrawStringPropDecal( {15.0f, nStep}, s, C64Color.LightBlue, {1.0f, 0.8f});
+			DrawStringPropDecal({ 15.0f, nStep }, s, C64Color.LightBlue, { 1.0f, 0.8f });
 			nStep += 10.0f;
 		}
 		vecMessages.clear();
