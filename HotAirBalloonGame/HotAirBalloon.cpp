@@ -698,11 +698,21 @@ private:
 		objectRick.vSourceStand = { 64, 48 };
 
 		objectRick.vecRunFrame.clear();
+		objectRick.vecRunFrame.push_back({ 64, 48 });
 		objectRick.vecRunFrame.push_back({ 96, 48 });
 		objectRick.vecRunFrame.push_back({ 128, 48 });
 		objectRick.vecRunFrame.push_back({ 160, 48 });
 		objectRick.vecRunFrame.push_back({ 192, 48 });
 		objectRick.vecRunFrame.push_back({ 224, 48 });
+		
+
+		objectRick.vecDeadDanceFrame.clear();
+		objectRick.vecDeadDanceFrame.push_back({ 96, 144 });
+		objectRick.vecDeadDanceFrame.push_back({ 128, 144 });
+		objectRick.vecDeadDanceFrame.push_back({ 96, 144 });
+		objectRick.vecDeadDanceFrame.push_back({ 128, 144 });
+		objectRick.vecDeadDanceFrame.push_back({ 96, 144 });
+		objectRick.vecDeadDanceFrame.push_back({ 128, 144 });
 
 		objectRick.vVel = { 0.0f, 0.2f };
 		objectRick.C64FileKey = C64FileTileKey.SetHero1;
@@ -817,6 +827,10 @@ private:
 		objectSoldier.vecRunFrame.push_back({ 32, 80 });
 		objectSoldier.vecRunFrame.push_back({ 64, 80 });
 
+		objectSoldier.vecDeadDanceFrame.clear();
+		objectSoldier.vecDeadDanceFrame.push_back({ 160, 80 });
+		objectSoldier.vecDeadDanceFrame.push_back({ 192, 80 });
+
 		objectSoldier.vVel = { 0.0f, 0.2f };
 		objectSoldier.C64FileKey = C64FileTileKey.SetEnemies2;
 
@@ -840,6 +854,10 @@ private:
 		objectWarrior.vecRunFrame.clear();
 		objectWarrior.vecRunFrame.push_back({ 64, 112 });
 		objectWarrior.vecRunFrame.push_back({ 96, 112 });
+
+		objectWarrior.vecDeadDanceFrame.clear();
+		objectWarrior.vecDeadDanceFrame.push_back({ 160, 112 });
+		objectWarrior.vecDeadDanceFrame.push_back({ 192, 112 });
 
 		objectWarrior.vVel = { 0.0f, 0.2f };
 		objectWarrior.C64FileKey = C64FileTileKey.SetEnemies3;
@@ -1167,13 +1185,6 @@ public:
 	sWorldObject objectBomb;		// Bomb object
 	sWorldObject objectExplosion;	// Explosion object
 
-
-
-
-
-
-	bool bFollowObject = false;
-
 	// Conveninet constants to define tile map world
 	olc::vi2d m_vWorldSize = { 256, 30 }; // 2048 64 cells
 	olc::vi2d m_vTileSize = { 8, 8 };
@@ -1213,7 +1224,11 @@ public:
 	std::vector<uint8_t> vWorldMapObjects;
 	std::vector<uint8_t> vWorldMapObjects_undo;
 
-	float testTime = 0.0f;
+	float fLifeTime = 0.0f;
+	int nTotalScore = 0;
+	int nTotalEnemiesLeft = 0;
+	int nPlayerLives = 0;
+	int nHeroLives = 0;
 
 	void EnableWorldObject(olc::vf2d vTile, WorldObjectType objectType, bool bRunningRight, int fStartIndex, uint8_t C64FileType)
 	{
@@ -1360,7 +1375,7 @@ public:
 					int vPosY = worldObject->vPos.y;
 
 					int idx = (vPosY * m_vWorldSize.x) + vPosX;
-					idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size()));
+					idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size()-1));
 
 					vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
 					sWorldObject worldObject1 = objectExplosion;
@@ -1392,6 +1407,10 @@ public:
 			vFrame = worldObject->vecRunFrame[worldObject->nRunCurrentFrame];
 			if (worldObject->eObjecttype == DeadDanceObject)
 			{
+				if (worldObject->nRunCurrentFrame >= worldObject->vecDeadDanceFrame.size())
+				{
+					worldObject->nRunCurrentFrame = 0;
+				}
 				vFrame = worldObject->vecDeadDanceFrame[worldObject->nRunCurrentFrame];
 			}
 			
@@ -1490,6 +1509,7 @@ public:
 		olc::vf2d vRayToNearest = vNearestPoint - worldObject->vPotentialPosition;
 		float fOverlap = worldObject->fRadius - vRayToNearest.mag();
 		if (std::isnan(fOverlap)) fOverlap = 0;
+		
 
 		// If overlap is positive, then a collision has occurred, so we displace backwards by the 
 		// overlap amount. The potential position is then tested against other tiles in the area
@@ -1606,6 +1626,7 @@ public:
 			{
 				worldObject->vPotentialPosition.x = worldObject->vStartPos.x + 1; // we need to move the position by 1 so not to case another collision
 				worldObject->vPotentialPosition.y = worldObject->vStartPos.y;
+				HandleReset();
 				break;
 			}
 
@@ -1736,9 +1757,11 @@ public:
 					// Rule 3
 					if (testObject1->bCanLoseLives)
 					{
+						nTotalScore += 10;
 						testObject1->nLives--; // we lose a life
 						if (testObject1->nLives < 0)
 						{
+							nTotalEnemiesLeft--;
 							testObject1->bIsDead = true;
 
 						}
@@ -1775,6 +1798,11 @@ public:
 		if (worldObject->eObjecttype == PlayerObject)
 		{
 			vTrackedPoint = worldObject->vPotentialPosition;
+			if (std::isnan(vTrackedPoint.x) || std::isnan(vTrackedPoint.y))
+			{
+				//player is stuck reset
+				HandleReset();
+			}
 		}
 
 
@@ -1977,7 +2005,7 @@ public:
 	}
 
 
-	float fLifeTime;
+
 	// Handles the lost of a life
 	void HandleGodMode(float fElapsedTime, sWorldObject* worldObject)
 	{
@@ -2111,7 +2139,11 @@ public:
 			vecObjectHeros.clear();
 			vecObjectEnemies.clear();
 			vecObjectDeadDance.clear();
+			
 			LoadMap("assets/levelonea.bin");
+			LoadWorldObjectsIntoMap();
+			nTotalScore = 0;
+			nTotalEnemiesLeft = vecObjectEnemies.size();
 		}
 		else
 		{
@@ -2217,23 +2249,10 @@ public:
 
 	}
 
-	int nTotalScore = 0;
-	int nTotalEnemiesLeft = 0;
-	int nPlayerLives = 0;
-	int nHeroLives = 0;
+
 	void HandleScores()
 	{
-		nTotalEnemiesLeft = vecObjectEnemies.size();
-		// lets get the total score and emenies left;
-		for (auto& enemiesObject : vecObjectEnemies)
-		{
-			if (enemiesObject.bIsDead)
-			{
-				nTotalScore += 10;
-				nTotalEnemiesLeft--;
-			}
-		}
-
+		
 		nPlayerLives = objectPlayer.nLives;
 
 		for (auto& heroObject : vecObjectHeros)
@@ -2284,6 +2303,13 @@ public:
 		}
 
 		vTrackedPoint += objectPlayer.vVel * 4.0f * fElapsedTime;
+
+		// Edge case when the player gets stuck
+		if (std::isnan(vTrackedPoint.x) || std::isnan(vTrackedPoint.x))
+		{
+			//Player is stuck lets reset
+			HandleReset();
+		}
 
 		for (auto& worldObject : vecObjectHeros)
 		{
@@ -3057,6 +3083,9 @@ public:
 		// Set background colour
 		Clear(C64Color.Blue);
 
+		// Set Default scores
+		nTotalScore = 0;
+		nTotalEnemiesLeft = vecObjectEnemies.size();
 		return true;
 	}
 
