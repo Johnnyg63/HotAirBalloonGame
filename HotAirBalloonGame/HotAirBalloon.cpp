@@ -34,7 +34,8 @@ public:
 		Scores,
 		ForgotRick,
 		RickDead,
-		YouDead
+		YouDead,
+		LevelCompleted
 	};
 
 	DisplayMessage CurrentMessages = HotAirBalloon::Welcome;
@@ -200,6 +201,8 @@ private:
 	std::string strEnemiesAlive = "ENEMIES LEFT: ";
 	std::string strHeroLives = "HERO LIVES: ";
 	std::string strPlayLives = "PLAYER LIVES: ";
+	std::string strLevelCompleted = "GREAT JOB, LEVEL COMPLETED!!!!";
+	std::string strPressSpaceToContinue = "PRESS SPACE BAR TO CONTINUE: ";
 	std::string strCOPY1 = "This demo is for eduction purposes only, images, logos and trademarks are owned by their respective identities";
 	std::string strCOPY2 = "Power by OLC Pixel Game Engine 2.0. C OneLoneCoder.com 2023";
 
@@ -2154,11 +2157,17 @@ public:
 	}
 
 	float fChangeMessageTime = 0.0f;
+	int nCountDownTime = 5;
 
 	void HandleMessages(float fElapsedTime)
 	{
 		fChangeMessageTime += fElapsedTime;
 		vecMessages.clear();
+		if (nTotalEnemiesLeft <= 14)
+		{
+			CurrentMessages = HotAirBalloon::LevelCompleted;
+		}
+
 		switch (CurrentMessages)
 		{
 		case HotAirBalloon::Welcome:
@@ -2211,7 +2220,7 @@ public:
 		}
 		case HotAirBalloon::RickDead:
 		{
-			if (fChangeMessageTime > 5)
+			if (fChangeMessageTime > 5 || GetKey(olc::SPACE).bPressed)
 			{
 				fChangeMessageTime = 0.0f;
 				CurrentMessages = HotAirBalloon::Welcome;
@@ -2221,13 +2230,16 @@ public:
 			else
 			{
 				vecMessages.push_back({ strRickDead });		// RICK IS DEAD, GAME OVER!
+				nCountDownTime = 5 - (int)fChangeMessageTime;
+				std::string message = strPressSpaceToContinue + std::to_string(nCountDownTime);
+				vecMessages.push_back({ message });
 			}
 
 			break;
 		}
 		case HotAirBalloon::YouDead:
 		{
-			if (fChangeMessageTime > 5)
+			if (fChangeMessageTime > 5 || GetKey(olc::SPACE).bPressed)
 			{
 				fChangeMessageTime = 0.0f;
 				CurrentMessages = HotAirBalloon::Welcome;
@@ -2237,9 +2249,34 @@ public:
 			else
 			{
 				vecMessages.push_back({ strRickDead });		// YOU DEAD, GAME OVER!
+				nCountDownTime = 5 - (int)fChangeMessageTime;
+				std::string message = strPressSpaceToContinue + std::to_string(nCountDownTime);
+				vecMessages.push_back({ message });
 			}
 
 			break;
+		}
+		case HotAirBalloon::LevelCompleted:
+		{
+
+			if (fChangeMessageTime > 5 || GetKey(olc::SPACE).bPressed)
+			{
+				fChangeMessageTime = 0.0f;
+				CurrentMessages = HotAirBalloon::Welcome;
+				HandleReset();
+				HandleMessages(fElapsedTime);
+				
+			}
+			else
+			{
+				vecMessages.push_back({ strLevelCompleted });
+				nCountDownTime = 5 - (int)fChangeMessageTime;
+				std::string message = strPressSpaceToContinue + std::to_string(nCountDownTime);
+				vecMessages.push_back({ message });
+			}
+
+			break;
+
 		}
 
 		default:
