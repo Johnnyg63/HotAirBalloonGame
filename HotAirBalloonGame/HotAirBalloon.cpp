@@ -699,8 +699,7 @@ private:
 		objectRick.vSize = { 24, 24 };
 		objectRick.vSourceSize = { 32, 32 };
 		objectRick.vSourceStand = { 64, 48 };
-		objectRick.vSourceFalling = { 128, 144 };
-		objectRick.vSourceLittle = { 196, 144 };
+
 
 		objectRick.vecRunFrame.clear();
 		objectRick.vecRunFrame.push_back({ 64, 48 });
@@ -709,7 +708,7 @@ private:
 		objectRick.vecRunFrame.push_back({ 160, 48 });
 		objectRick.vecRunFrame.push_back({ 192, 48 });
 		objectRick.vecRunFrame.push_back({ 224, 48 });
-		
+
 
 		objectRick.vecDeadDanceFrame.clear();
 		objectRick.vecDeadDanceFrame.push_back({ 96, 144 });
@@ -873,7 +872,7 @@ private:
 		objectFootSoldier.fRadius = 1.0f;
 		objectFootSoldier.eObjecttype = EnemiesObject;
 		objectFootSoldier.nDefaultLives = 2;
-		objectFootSoldier.nLives = 0;
+		objectFootSoldier.nLives = 2;
 		objectFootSoldier.nRunCurrentFrame = 0;
 		objectFootSoldier.nRunFrames = 3;
 		objectFootSoldier.pDecal = decEnemiesSpriteSheetb;
@@ -888,10 +887,6 @@ private:
 		objectFootSoldier.vecRunFrame.push_back({ 64, 48 });
 		objectFootSoldier.vecRunFrame.push_back({ 96, 48 });
 
-		objectFootSoldier.vecDeadDanceFrame.clear();
-		objectFootSoldier.vecDeadDanceFrame.push_back({ 256, 48 });
-		objectFootSoldier.vecDeadDanceFrame.push_back({ 32, 80 });
-
 		objectFootSoldier.vVel = { 0.0f, 0.2f };
 		objectFootSoldier.C64FileKey = C64FileTileKey.SetEnemies4;
 
@@ -900,7 +895,7 @@ private:
 		objectOfficer.fRadius = 1.0f;
 		objectOfficer.eObjecttype = EnemiesObject;
 		objectOfficer.nDefaultLives = 3;
-		objectOfficer.nLives = 0;
+		objectOfficer.nLives = 3;
 		objectOfficer.nRunCurrentFrame = 0;
 		objectOfficer.nRunFrames = 3;
 		objectOfficer.pDecal = decEnemiesSpriteSheetb;
@@ -915,10 +910,6 @@ private:
 		objectOfficer.vecRunFrame.push_back({ 128, 80 });
 		objectOfficer.vecRunFrame.push_back({ 160, 80 });
 
-		objectOfficer.vecDeadDanceFrame.clear();
-		objectOfficer.vecDeadDanceFrame.push_back({ 64, 112 });
-		objectOfficer.vecDeadDanceFrame.push_back({ 96, 112 });
-
 		objectOfficer.vVel = { 0.0f, 0.2f };
 		objectOfficer.C64FileKey = C64FileTileKey.SetEnemies5;
 
@@ -927,7 +918,7 @@ private:
 		objectMummy.fRadius = 1.0f;
 		objectMummy.eObjecttype = EnemiesObject;
 		objectMummy.nDefaultLives = 2;
-		objectMummy.nLives = 0;
+		objectMummy.nLives = 2;
 		objectMummy.nRunCurrentFrame = 0;
 		objectMummy.nRunFrames = 3;
 		objectMummy.pDecal = decEnemiesSpriteSheetb;
@@ -941,10 +932,6 @@ private:
 		objectMummy.vecRunFrame.clear();
 		objectMummy.vecRunFrame.push_back({ 224, 144 });
 		objectMummy.vecRunFrame.push_back({ 256, 144 });
-
-		objectMummy.vecDeadDanceFrame.clear();
-		objectMummy.vecDeadDanceFrame.push_back({ 32, 144 });
-		objectMummy.vecDeadDanceFrame.push_back({ 64, 144 });
 
 		objectMummy.vVel = { 0.0f, 0.2f };
 		objectMummy.C64FileKey = C64FileTileKey.SetEnemies6;
@@ -1150,7 +1137,6 @@ public:
 		bool bCanMove = true;
 		bool bIsDead = false;
 		bool bCanLoseLives = true;
-		bool bIsLinked = false;
 
 		int nDefaultLives = 5;
 		int nLives = 1;
@@ -1170,8 +1156,6 @@ public:
 		olc::vf2d vSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceSize = { 0.0f, 0.0f };
 		olc::vf2d vSourceStand = { 0.0f, 0.0f };
-		olc::vf2d vSourceFalling = { 0.0f, 0.0f };
-		olc::vf2d vSourceLittle = { 0.0f, 0.0f };
 		std::vector<olc::vf2d> vecRunFrame;
 		std::vector<olc::vf2d> vecDeadDanceFrame;
 		olc::vf2d vStartPos = { 0.0f, 0.0f };
@@ -1370,16 +1354,18 @@ public:
 	void DrawWorldObjects(float fElaspedTime, sWorldObject* worldObject, bool bIsForeGround)
 	{
 
-		if (!worldObject->bEnabled || worldObject->bIsDead || worldObject->bIsLinked) return;
+		if (!worldObject->bEnabled || worldObject->bIsDead) return;
 		if (bIsForeGround != worldObject->bIsForeGround) return;
-
-
 
 		worldObject->fFrameTime = worldObject->fFrameTime + fElaspedTime;
 		float rotation = 0.125;
 		olc::vf2d vFrame = worldObject->vSourceStand;
 
-		// get the run frames
+		// Special case Dead Dance Objects
+
+
+
+			// get the run frames
 		if (worldObject->fFrameTime > (worldObject->fFrameChangeTime * (worldObject->nRunCurrentFrame + 1)))
 		{
 			worldObject->nRunCurrentFrame += 1;
@@ -1393,7 +1379,7 @@ public:
 					int vPosY = worldObject->vPos.y;
 
 					int idx = (vPosY * m_vWorldSize.x) + vPosX;
-					idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size()-1));
+					idx = std::clamp(idx, 0, (int)(vWorldMapObjects.size() - 1));
 
 					vWorldMapObjects[idx] = C64FileTileKey.SetExplosion1;
 					sWorldObject worldObject1 = objectExplosion;
@@ -1431,7 +1417,7 @@ public:
 				}
 				vFrame = worldObject->vecDeadDanceFrame[worldObject->nRunCurrentFrame];
 			}
-			
+
 		}
 
 
@@ -1510,8 +1496,6 @@ public:
 		}
 
 
-
-
 	}
 
 	// lets get the collision
@@ -1529,14 +1513,14 @@ public:
 		olc::vf2d vRayToNearest = vNearestPoint - worldObject->vPotentialPosition;
 		float fOverlap = worldObject->fRadius - vRayToNearest.mag();
 		if (std::isnan(fOverlap)) fOverlap = 0;
-		
+
 
 		// If overlap is positive, then a collision has occurred, so we displace backwards by the 
 		// overlap amount. The potential position is then tested against other tiles in the area
 		// therefore "statically" resolving the collision
 		if (fOverlap > 0)
 		{
-			
+
 			switch (worldObject->eObjecttype)
 			{
 			case HeroObject:
@@ -1708,16 +1692,8 @@ public:
 				case HeroObject:
 				case PlayerObject:
 				{
-					// we only link if it is rick
-					objectPlayer.bIsLinked = true;
-					for (auto& heroObject : vecObjectHeros)
-					{
-						if (heroObject.C64FileKey == C64FileTileKey.SetHero1)
-						{
-							heroObject.bIsLinked = true;
-							break;
-						}
-					}
+					// rule 1
+					// Nothiong to do here they can touch
 					break;
 				}
 
@@ -2167,7 +2143,7 @@ public:
 			vecObjectHeros.clear();
 			vecObjectEnemies.clear();
 			vecObjectDeadDance.clear();
-			
+
 			LoadMap("assets/levelonea.bin");
 			LoadWorldObjectsIntoMap();
 			nTotalScore = 0;
@@ -2290,7 +2266,7 @@ public:
 				CurrentMessages = HotAirBalloon::Welcome;
 				HandleReset();
 				HandleMessages(fElapsedTime);
-				
+
 			}
 			else
 			{
@@ -2314,7 +2290,7 @@ public:
 
 	void HandleScores()
 	{
-		
+
 		nPlayerLives = objectPlayer.nLives;
 
 		for (auto& heroObject : vecObjectHeros)
@@ -2375,7 +2351,7 @@ public:
 
 		for (auto& worldObject : vecObjectHeros)
 		{
-			if (worldObject.bEnabled && !worldObject.bIsLinked)
+			if (worldObject.bEnabled)
 			{
 				DrawWorldObjects(fElapsedTime, &worldObject, false); // Draw Background worldObjects
 				worldObject.vVel = { 0.0f, 0.0f };
@@ -2826,7 +2802,7 @@ public:
 			}
 
 
-		// Some borders change to clamp
+		// Some borders 
 		if (vTrackedPoint.x < 0.00f)
 		{
 			vTrackedPoint.x = 0.00f;
@@ -2864,26 +2840,7 @@ public:
 		}
 
 		if (objectPlayer.bCanLoseLives || objectPlayer.bShowHide)
-		{
 			tv.DrawDecal(vTrackedPoint - olc::vf2d(1.5f, 1.5f), objectPlayer.pDecal);
-			if (objectPlayer.bIsLinked)
-			{
-
-				for (auto& worldObject : vecObjectHeros)
-				{
-					if(worldObject.bIsLinked)
-					{ 
-						tv.DrawPartialDecal(vTrackedPoint - olc::vf2d(1.2f, 1.2f), 
-							worldObject.vSize, worldObject.pDecal, worldObject.vSourceLittle, worldObject.vSourceSize);
-						break;
-					}
-				}
-
-				
-			}
-
-		}
-			
 
 
 		HandleBorders(&objectPlayer);
