@@ -2164,7 +2164,7 @@ public:
 	{
 		fChangeMessageTime += fElapsedTime;
 		vecMessages.clear();
-		if (nTotalEnemiesLeft <= 14)
+		if (nTotalEnemiesLeft <= 0)
 		{
 			CurrentMessages = HotAirBalloon::LevelCompleted;
 		}
